@@ -19,7 +19,8 @@ public enum ErrorCode {
 
 	ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "ENTITY_NOT_FOUND", "해당 데이터를 찾을 수 없습니다."),
 
-	COUPON_TYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "COUPON_TYPE_NOT_FOUND", "유효하지 않는 쿠폰 타입입니다.");
+	COUPON_TYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "COUPON_TYPE_NOT_FOUND", "유효하지 않는 쿠폰 타입입니다."),
+	INVALID_DISCOUNT_PERCENTAGE(HttpStatus.BAD_REQUEST, "INVALID_DISCOUNT_PERCENTAGE", "할인율은 1~100까지 입력가능합니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
