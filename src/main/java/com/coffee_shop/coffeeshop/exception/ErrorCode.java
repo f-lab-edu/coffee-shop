@@ -17,7 +17,9 @@ public enum ErrorCode {
 	INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "INVALID_TYPE_VALUE", "요청 값의 타입이 잘못되었습니다."),
 	MISSING_REQUEST_PARAM(HttpStatus.BAD_REQUEST, "MISSING_REQUEST_PARAM", "요청 파라미터를 누락하였습니다."),
 
-	ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "ENTITY_NOT_FOUND", "해당 데이터를 찾을 수 없습니다.");
+	ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "ENTITY_NOT_FOUND", "해당 데이터를 찾을 수 없습니다."),
+
+	COUPON_TYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "COUPON_TYPE_NOT_FOUND", "유효하지 않는 쿠폰 타입입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
