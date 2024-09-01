@@ -13,12 +13,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
-import com.coffee_shop.coffeeshop.controller.ControllerSupport;
+import com.coffee_shop.coffeeshop.controller.RestDocsSupport;
 import com.coffee_shop.coffeeshop.controller.coupon.api.dto.request.CouponSaveRequest;
+import com.coffee_shop.coffeeshop.docs.coupon.CouponDocumentation;
 import com.coffee_shop.coffeeshop.service.coupon.CouponService;
 
 @WebMvcTest(controllers = CouponController.class)
-class CouponControllerTest extends ControllerSupport {
+class CouponControllerTest extends RestDocsSupport {
 
 	@MockBean
 	protected CouponService couponService;
@@ -295,6 +296,7 @@ class CouponControllerTest extends ControllerSupport {
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.code").value("CREATED"))
 			.andExpect(jsonPath("$.message").value("CREATED"))
-			.andExpect(header().string("Location", "/api/coupons/1"));
+			.andExpect(header().string("Location", "/api/coupons/1"))
+			.andDo(CouponDocumentation.createCoupon());
 	}
 }

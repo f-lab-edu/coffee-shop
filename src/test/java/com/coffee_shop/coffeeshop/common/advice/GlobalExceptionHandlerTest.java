@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
-import com.coffee_shop.coffeeshop.controller.ControllerSupport;
+import com.coffee_shop.coffeeshop.controller.RestDocsSupport;
 import com.coffee_shop.coffeeshop.exception.ErrorCode;
 
 @ContextConfiguration(classes = {GlobalExceptionHandlerTest.TestController.class, GlobalExceptionHandler.class})
 @WebMvcTest(controllers = GlobalExceptionHandlerTest.TestController.class)
-class GlobalExceptionHandlerTest extends ControllerSupport {
+class GlobalExceptionHandlerTest extends RestDocsSupport {
 	@DisplayName("요청 값에 맞지 않는 타입이 들어올 경우 예외를 처리한다.")
 	@Test
 	void handleMethodArgumentTypeMismatchException() throws Exception {
