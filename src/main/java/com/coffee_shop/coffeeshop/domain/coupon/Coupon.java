@@ -48,12 +48,20 @@ public class Coupon extends BaseTimeEntity {
 	private int maxIssueCount;
 
 	@Builder
-	private Coupon(String name, CouponType type, Cash discountAmount, int minOrderAmount,
+	private Coupon(String name, CouponType type, int discountAmount, int minOrderAmount,
 		int maxIssueCount) {
 		this.name = name;
 		this.type = type;
-		this.discountAmount = discountAmount;
+		this.discountAmount = convertDiscountAmount(type, discountAmount);
 		this.minOrderAmount = minOrderAmount;
 		this.maxIssueCount = maxIssueCount;
+	}
+
+	private Cash convertDiscountAmount(CouponType type, int discountAmount) {
+		if (type == CouponType.PERCENTAGE) {
+			return Cash.of(discountAmount).divide(100);
+		}
+
+		return Cash.of(discountAmount);
 	}
 }

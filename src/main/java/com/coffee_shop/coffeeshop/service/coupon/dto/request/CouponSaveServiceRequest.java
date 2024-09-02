@@ -1,6 +1,5 @@
 package com.coffee_shop.coffeeshop.service.coupon.dto.request;
 
-import com.coffee_shop.coffeeshop.domain.cash.Cash;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponType;
 
@@ -32,17 +31,10 @@ public class CouponSaveServiceRequest {
 		return Coupon.builder()
 			.name(name)
 			.type(type)
-			.discountAmount(convertDiscountAmount())
+			.discountAmount(discountAmount)
 			.minOrderAmount(minOrderAmount)
 			.maxIssueCount(maxIssueCount)
 			.build();
 	}
 
-	private Cash convertDiscountAmount() {
-		if (type == CouponType.PERCENTAGE) {
-			return Cash.of(discountAmount).divide(100);
-		}
-
-		return Cash.of(discountAmount);
-	}
 }
