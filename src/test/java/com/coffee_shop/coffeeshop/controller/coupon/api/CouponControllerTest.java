@@ -30,7 +30,7 @@ class CouponControllerTest extends RestDocsSupport {
 		//given
 		CouponSaveRequest request = CouponSaveRequest.builder()
 			.name("")
-			.type(PERCENTAGE.getCode())
+			.type(PERCENTAGE)
 			.discountAmount(100)
 			.minOrderAmount(100)
 			.build();
@@ -55,7 +55,7 @@ class CouponControllerTest extends RestDocsSupport {
 		//given
 		CouponSaveRequest request = CouponSaveRequest.builder()
 			.name("A".repeat(31))
-			.type(PERCENTAGE.getCode())
+			.type(PERCENTAGE)
 			.discountAmount(100)
 			.minOrderAmount(100)
 			.build();
@@ -72,31 +72,6 @@ class CouponControllerTest extends RestDocsSupport {
 			.andExpect(jsonPath("$.message").value("적절하지 않은 요청 값입니다."))
 			.andExpect(jsonPath("$.fieldErrors[0].field").value("name"))
 			.andExpect(jsonPath("$.fieldErrors[0].message").value("쿠폰명은 최대 30자까지 입력가능합니다."));
-	}
-
-	@DisplayName("쿠폰 등록 시 쿠폰 타입은 필수값이다.")
-	@Test
-	void createCouponWhenTypeIsEmpty() throws Exception {
-		//given
-		CouponSaveRequest request = CouponSaveRequest.builder()
-			.name("할인쿠폰")
-			.type("")
-			.discountAmount(100)
-			.minOrderAmount(100)
-			.build();
-
-		//when //then
-		mockMvc.perform(
-				post("/api/coupons")
-					.content(objectMapper.writeValueAsString(request))
-					.contentType(MediaType.APPLICATION_JSON)
-			)
-			.andDo(print())
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
-			.andExpect(jsonPath("$.message").value("적절하지 않은 요청 값입니다."))
-			.andExpect(jsonPath("$.fieldErrors[0].field").value("type"))
-			.andExpect(jsonPath("$.fieldErrors[0].message").value("쿠폰 타입은 필수입니다."));
 	}
 
 	@DisplayName("쿠폰 등록 시 쿠폰 타입은 null이 아니어야 한다.")
@@ -121,30 +96,7 @@ class CouponControllerTest extends RestDocsSupport {
 			.andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"))
 			.andExpect(jsonPath("$.message").value("적절하지 않은 요청 값입니다."))
 			.andExpect(jsonPath("$.fieldErrors[0].field").value("type"))
-			.andExpect(jsonPath("$.fieldErrors[0].message").value("쿠폰 타입은 필수입니다."));
-	}
-
-	@DisplayName("쿠폰 등록 시 유효한 쿠폰 타입을 입력해야한다.")
-	@Test
-	void createCouponWhenCouponTypeIsInvalid() throws Exception {
-		//given
-		CouponSaveRequest request = CouponSaveRequest.builder()
-			.name("할인쿠폰")
-			.type("test")
-			.discountAmount(100)
-			.minOrderAmount(100)
-			.build();
-
-		//when //then
-		mockMvc.perform(
-				post("/api/coupons")
-					.content(objectMapper.writeValueAsString(request))
-					.contentType(MediaType.APPLICATION_JSON)
-			)
-			.andDo(print())
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.code").value("COUPON_TYPE_NOT_FOUND"))
-			.andExpect(jsonPath("$.message").value("유효하지 않는 쿠폰 타입입니다."));
+			.andExpect(jsonPath("$.fieldErrors[0].message").value("유효하지 않는 쿠폰타입입니다."));
 	}
 
 	@DisplayName("쿠폰 등록 시 할인 금액은 양수이다.")
@@ -153,7 +105,7 @@ class CouponControllerTest extends RestDocsSupport {
 		//given
 		CouponSaveRequest request = CouponSaveRequest.builder()
 			.name("할인쿠폰")
-			.type(AMOUNT.getCode())
+			.type(AMOUNT)
 			.discountAmount(0)
 			.minOrderAmount(100)
 			.build();
@@ -178,7 +130,7 @@ class CouponControllerTest extends RestDocsSupport {
 		//given
 		CouponSaveRequest request = CouponSaveRequest.builder()
 			.name("할인쿠폰")
-			.type(PERCENTAGE.getCode())
+			.type(PERCENTAGE)
 			.discountAmount(101)
 			.minOrderAmount(100)
 			.build();
@@ -201,7 +153,7 @@ class CouponControllerTest extends RestDocsSupport {
 		//given
 		CouponSaveRequest request = CouponSaveRequest.builder()
 			.name("할인쿠폰")
-			.type(AMOUNT.getCode())
+			.type(AMOUNT)
 			.discountAmount(100)
 			.minOrderAmount(0)
 			.build();
@@ -227,7 +179,7 @@ class CouponControllerTest extends RestDocsSupport {
 		//given
 		CouponSaveRequest request = CouponSaveRequest.builder()
 			.name("할인쿠폰")
-			.type(AMOUNT.getCode())
+			.type(AMOUNT)
 			.discountAmount(100)
 			.minOrderAmount(-1)
 			.build();
@@ -252,7 +204,7 @@ class CouponControllerTest extends RestDocsSupport {
 		//given
 		CouponSaveRequest request = CouponSaveRequest.builder()
 			.name("할인쿠폰")
-			.type(AMOUNT.getCode())
+			.type(AMOUNT)
 			.discountAmount(100)
 			.minOrderAmount(100)
 			.maxIssueCount(-1)
@@ -278,7 +230,7 @@ class CouponControllerTest extends RestDocsSupport {
 		//given
 		CouponSaveRequest request = CouponSaveRequest.builder()
 			.name("할인쿠폰")
-			.type(AMOUNT.getCode())
+			.type(AMOUNT)
 			.discountAmount(1000)
 			.minOrderAmount(10000)
 			.maxIssueCount(1000)
