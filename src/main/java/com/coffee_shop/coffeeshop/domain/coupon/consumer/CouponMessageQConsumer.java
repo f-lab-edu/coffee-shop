@@ -59,7 +59,7 @@ public class CouponMessageQConsumer implements CouponConsumer {
 				} catch (BusinessException e) {
 					log.info("쿠폰발급 실패 > " + e.getMessage());
 				} catch (Exception e) {
-					couponIssueFailHandler.retry(couponApplication, e);
+					couponIssueFailHandler.handleFail(couponApplication, e);
 				}
 			}
 		}
