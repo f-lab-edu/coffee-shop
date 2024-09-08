@@ -49,8 +49,8 @@ class CouponServiceTest extends IntegrationTestSupport {
 
 		List<Coupon> coupons = couponRepository.findAll();
 		assertThat(coupons).hasSize(1)
-			.extracting("id", "type", "discountAmount", "minOrderAmount", "maxIssueCount")
-			.containsExactlyInAnyOrder(tuple(couponId, AMOUNT, Cash.of(1000), 4000, 1000));
+			.extracting("id", "type", "discountAmount", "minOrderAmount", "maxIssueCount", "issuedCount")
+			.containsExactlyInAnyOrder(tuple(couponId, AMOUNT, Cash.of(1000), 4000, 1000, 0));
 	}
 
 	@DisplayName("비율 할인 쿠폰을 생성한다.")
@@ -73,7 +73,7 @@ class CouponServiceTest extends IntegrationTestSupport {
 
 		List<Coupon> coupons = couponRepository.findAll();
 		assertThat(coupons).hasSize(1)
-			.extracting("id", "type", "discountAmount", "minOrderAmount", "maxIssueCount")
-			.containsExactlyInAnyOrder(tuple(couponId, PERCENTAGE, Cash.of("0.5"), 4000, 1000));
+			.extracting("id", "type", "discountAmount", "minOrderAmount", "maxIssueCount", "issuedCount")
+			.containsExactlyInAnyOrder(tuple(couponId, PERCENTAGE, Cash.of("0.5"), 4000, 1000, 0));
 	}
 }

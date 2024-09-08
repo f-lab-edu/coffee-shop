@@ -47,14 +47,17 @@ public class Coupon extends BaseTimeEntity {
 
 	private int maxIssueCount;
 
+	private int issuedCount;
+
 	@Builder
 	private Coupon(String name, CouponType type, int discountAmount, int minOrderAmount,
-		int maxIssueCount) {
+		int maxIssueCount, int issuedCount) {
 		this.name = name;
 		this.type = type;
 		this.discountAmount = convertDiscountAmount(type, discountAmount);
 		this.minOrderAmount = minOrderAmount;
 		this.maxIssueCount = maxIssueCount;
+		this.issuedCount = issuedCount;
 	}
 
 	private Cash convertDiscountAmount(CouponType type, int discountAmount) {
@@ -63,5 +66,17 @@ public class Coupon extends BaseTimeEntity {
 		}
 
 		return Cash.of(discountAmount);
+	}
+
+	public boolean canIssueCoupon() {
+		if (issuedCount < maxIssueCount) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public void issueCoupon() {
+		issuedCount += 1;
 	}
 }
