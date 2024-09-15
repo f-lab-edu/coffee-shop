@@ -1,7 +1,7 @@
 package com.coffee_shop.coffeeshop.domain.coupon;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.springframework.stereotype.Component;
 
@@ -10,18 +10,18 @@ import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 @Component
 public class MessageQ {
 
-	private final Queue<CouponApplication> queue;
+	private final Deque<CouponApplication> queue;
 
 	public MessageQ() {
-		this.queue = new ConcurrentLinkedQueue<>();
+		this.queue = new ConcurrentLinkedDeque<>();
 	}
 
 	public void addMessage(CouponApplication message) {
-		queue.offer(message);
+		queue.add(message);
 	}
 
 	public CouponApplication takeMessage() {
-		return queue.poll();
+		return queue.removeFirst();
 	}
 
 	public boolean isEmpty() {
