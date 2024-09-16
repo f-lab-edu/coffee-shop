@@ -3,22 +3,44 @@ package com.coffee_shop.coffeeshop.service.coupon.dto.request;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
+import com.coffee_shop.coffeeshop.domain.user.User;
+
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CouponApplication {
-	private final Long userId;
+	private Long userId;
 
-	private final Long couponId;
+	private Long couponId;
 
-	private final LocalDateTime issueDateTime;
+	private LocalDateTime issueDateTime;
 
 	private int failCount;
 
 	private List<Exception> exceptionList = new ArrayList<>();
+
+	@Builder
+	private CouponApplication(Long userId, Long couponId, LocalDateTime issueDateTime, int failCount) {
+		this.userId = userId;
+		this.couponId = couponId;
+		this.issueDateTime = issueDateTime;
+		this.failCount = failCount;
+	}
+
+	public static CouponApplication createCouponApplication(User user, Coupon coupon, LocalDateTime issueDateTime) {
+		return CouponApplication.builder()
+			.userId(user.getId())
+			.couponId(coupon.getId())
+			.issueDateTime(issueDateTime)
+			.build();
+	}
 
 	public void addException(Exception e) {
 		exceptionList.add(e);
@@ -26,6 +48,23 @@ public class CouponApplication {
 
 	public void increaseFailCount() {
 		failCount += 1;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		CouponApplication that = (CouponApplication)o;
+		return getFailCount() == that.getFailCount() && Objects.equals(getUserId(), that.getUserId())
+			&& Objects.equals(getCouponId(), that.getCouponId()) && Objects.equals(getIssueDateTime(),
+			that.getIssueDateTime());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getUserId(), getCouponId(), getIssueDateTime(), getFailCount());
 	}
 
 	@Override

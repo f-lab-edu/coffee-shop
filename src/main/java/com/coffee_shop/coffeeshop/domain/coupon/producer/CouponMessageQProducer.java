@@ -19,6 +19,7 @@ public class CouponMessageQProducer implements CouponProducer {
 
 	@Override
 	public void applyCoupon(User user, Coupon coupon, LocalDateTime issueDateTime) {
-		messageQ.addMessage(new CouponApplication(user.getId(), coupon.getId(), issueDateTime));
+		CouponApplication couponApplication = CouponApplication.createCouponApplication(user, coupon, issueDateTime);
+		messageQ.addMessage(couponApplication);
 	}
 }
