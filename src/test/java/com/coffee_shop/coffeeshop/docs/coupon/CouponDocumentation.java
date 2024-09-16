@@ -45,7 +45,31 @@ public class CouponDocumentation {
 					.description("응답 데이터")
 			),
 			responseHeaders(
-				headerWithName("Location").description("생성된 쿠폰 ID")
+				headerWithName("Location").description("생성된 쿠폰 URI")
+			)
+		);
+	}
+
+	public static RestDocumentationResultHandler applyCoupon() {
+		return document("coupon/apply",
+			preprocessRequest(prettyPrint()),
+			preprocessResponse(prettyPrint()),
+			requestFields(
+				fieldWithPath("userId").type(JsonFieldType.NUMBER).description("사용자 ID")
+					.attributes(key("constraints").value("양수")),
+				fieldWithPath("couponId").type(JsonFieldType.NUMBER).description("쿠폰 ID")
+					.attributes(key("constraints").value("양수"))
+			),
+			responseFields(
+				fieldWithPath("code").type(JsonFieldType.STRING)
+					.description("코드"),
+				fieldWithPath("message").type(JsonFieldType.STRING)
+					.description("메시지"),
+				fieldWithPath("data").type(JsonFieldType.NULL)
+					.description("응답 데이터")
+			),
+			responseHeaders(
+				headerWithName("Location").description("쿠폰 발급 결과 URI")
 			)
 		);
 	}

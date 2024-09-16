@@ -1,0 +1,12 @@
+[[coupon-apply]]
+=== 쿠폰 발급
+
+==== HTTP Request
+
+include::{snippets}/coupon/apply/http-request.adoc[]
+include::{snippets}/coupon/apply/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/coupon/apply/http-response.adoc[]
+include::{snippets}/coupon/apply/response-fields.adoc[]
