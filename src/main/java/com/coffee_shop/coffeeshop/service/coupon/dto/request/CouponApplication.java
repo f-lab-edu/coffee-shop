@@ -28,4 +28,14 @@ public class CouponApplication {
 		failCount += 1;
 	}
 
+	@Override
+	public String toString() {
+		return "CouponApplication{" +
+			"userId=" + userId +
+			", couponId=" + couponId +
+			", issueDateTime=" + issueDateTime +
+			", failCount=" + failCount +
+			", exceptionList=" + exceptionList +
+			'}';
+	}
 }
