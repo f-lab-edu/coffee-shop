@@ -31,4 +31,8 @@ public class MessageQ {
 	public int size() {
 		return queue.size();
 	}
+
+	public void addFirst(CouponApplication couponApplication) {
+		queue.addFirst(couponApplication);
+	}
 }

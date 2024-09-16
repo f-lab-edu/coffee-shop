@@ -20,10 +20,11 @@ public class CouponIssueFailHandler {
 	public void handleFail(CouponApplication couponApplication, Exception e) {
 		couponApplication.addException(e);
 		couponApplication.increaseFailCount();
+
 		if (couponApplication.getFailCount() >= MAX_FAIL_COUNT) {
 			handleTooManyFails(couponApplication);
 		} else {
-			messageQ.addMessage(couponApplication);
+			messageQ.addFirst(couponApplication);
 		}
 	}
 
