@@ -1,0 +1,12 @@
+[[coupon-create]]
+=== 쿠폰 등록
+
+==== HTTP Request
+
+include::{snippets}/coupon/create/http-request.adoc[]
+include::{snippets}/coupon/create/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/coupon/create/http-response.adoc[]
+include::{snippets}/coupon/create/response-fields.adoc[]

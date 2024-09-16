@@ -1,0 +1,6 @@
+[[Coupon-API]]
+== Coupon API
+
+include::coupon-create.adoc[]
+
+
