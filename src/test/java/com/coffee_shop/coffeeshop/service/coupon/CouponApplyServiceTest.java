@@ -26,6 +26,7 @@ import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponMessageQProducer;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
 class CouponApplyServiceTest extends IntegrationTestSupport {
 
@@ -68,7 +69,7 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
+		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
 
 		//then
 		assertThat(messageQ.size()).isEqualTo(1);
@@ -90,7 +91,7 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
 				} finally {
 					latch.countDown();
 				}
@@ -114,7 +115,7 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime))
+			() -> couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("쿠폰이 모두 소진되어 발급할 수 없습니다.");
 	}
@@ -131,10 +132,17 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime))
+			() -> couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID, 이름 : " + user.getId() + ", "
 				+ user.getName());
+	}
+
+	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
+		return CouponApplyServiceRequest.builder()
+			.userId(userId)
+			.couponId(couponId)
+			.build();
 	}
 
 	private CouponTransactionHistory createCouponTransactionHistory(Coupon coupon, User user,

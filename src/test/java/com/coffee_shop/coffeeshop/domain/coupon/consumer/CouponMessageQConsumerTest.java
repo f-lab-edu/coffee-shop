@@ -25,6 +25,7 @@ import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.CouponApplyService;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
 class CouponMessageQConsumerTest extends IntegrationTestSupport {
 	@Autowired
@@ -58,7 +59,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
+		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
 
 		//then
 		Thread.sleep(1000);
@@ -94,7 +95,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(users.remove(), coupon.getId(), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
 				} finally {
 					latch.countDown();
 				}
@@ -112,6 +113,13 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
 
 		assertTrue(messageQ.isEmpty());
+	}
+
+	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
+		return CouponApplyServiceRequest.builder()
+			.userId(userId)
+			.couponId(couponId)
+			.build();
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {

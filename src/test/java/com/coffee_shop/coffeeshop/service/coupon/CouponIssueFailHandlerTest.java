@@ -28,6 +28,7 @@ import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -81,7 +82,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		listAppender.start();
 
 		//when
-		couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
+		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
 
 		//then
 		Thread.sleep(1000);
@@ -146,7 +147,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(users.remove(), coupon.getId(), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
 				} finally {
 					latch.countDown();
 				}
@@ -212,7 +213,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(users.remove(), coupon.getId(), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
 				} finally {
 					latch.countDown();
 				}
@@ -240,6 +241,13 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 				+ ", issueDateTime="
 				+ issueDateTime + ", failCount=" + maxFailCount
 				+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
+	}
+
+	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
+		return CouponApplyServiceRequest.builder()
+			.userId(userId)
+			.couponId(couponId)
+			.build();
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {

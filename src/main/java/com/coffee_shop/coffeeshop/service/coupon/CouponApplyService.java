@@ -13,6 +13,7 @@ import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponProducer;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.exception.ErrorCode;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,9 +26,9 @@ public class CouponApplyService {
 	private final CouponProducer couponMessageQProducer;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
-	public void applyCoupon(Long userId, Long couponId, LocalDateTime issueDateTime) {
-		User user = findUser(userId);
-		Coupon coupon = findCoupon(couponId);
+	public void applyCoupon(CouponApplyServiceRequest request, LocalDateTime issueDateTime) {
+		User user = findUser(request.getUserId());
+		Coupon coupon = findCoupon(request.getCouponId());
 
 		//발급할 수 있는 쿠폰개수를 확인한다.
 		if (!coupon.canIssueCoupon()) {
