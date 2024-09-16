@@ -2,6 +2,7 @@ package com.coffee_shop.coffeeshop.domain.coupon.consumer;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
@@ -36,6 +38,9 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 
 	@Autowired
 	private CouponRepository couponRepository;
+
+	@Autowired
+	private MessageQ messageQ;
 
 	@AfterEach
 	void tearDown() {
@@ -57,7 +62,13 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 
 		//then
 		Thread.sleep(1000);
+
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(1);
+
+		List<Coupon> coupons = couponRepository.findAll();
+		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(1);
+
+		assertTrue(messageQ.isEmpty());
 	}
 
 	@DisplayName("쿠폰을 여러명에게 발급한다.")
@@ -69,6 +80,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
+		//1000명 유저 생성
 		Queue<Long> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = userRepository.save(createUser());
@@ -95,8 +107,11 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		Thread.sleep(2000);
 
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
+
 		List<Coupon> coupons = couponRepository.findAll();
 		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
+
+		assertTrue(messageQ.isEmpty());
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {
