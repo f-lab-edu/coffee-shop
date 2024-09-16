@@ -22,11 +22,11 @@ import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryReposito
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.CouponIssueService;
+import com.coffee_shop.coffeeshop.service.coupon.CouponApplyService;
 
 class CouponMessageQConsumerTest extends IntegrationTestSupport {
 	@Autowired
-	private CouponIssueService couponIssueService;
+	private CouponApplyService couponApplyService;
 
 	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
@@ -53,7 +53,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponIssueService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
+		couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
 
 		//then
 		Thread.sleep(1000);
@@ -82,7 +82,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponIssueService.applyCoupon(users.remove(), coupon.getId(), issueDateTime);
+					couponApplyService.applyCoupon(users.remove(), coupon.getId(), issueDateTime);
 				} finally {
 					latch.countDown();
 				}

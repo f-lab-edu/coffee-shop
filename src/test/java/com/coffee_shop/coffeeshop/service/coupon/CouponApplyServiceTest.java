@@ -27,7 +27,7 @@ import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 
-class CouponIssueServiceTest extends IntegrationTestSupport {
+class CouponApplyServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private UserRepository userRepository;
@@ -41,14 +41,14 @@ class CouponIssueServiceTest extends IntegrationTestSupport {
 	@MockBean
 	private CouponConsumer couponMessageQConsumer;
 
-	private CouponIssueService couponIssueService;
+	private CouponApplyService couponApplyService;
 	private MessageQ messageQ;
 
 	@BeforeEach
 	void setUp() {
 		messageQ = new MessageQ();
 		CouponMessageQProducer couponMessageQProducer = new CouponMessageQProducer(messageQ);
-		couponIssueService = new CouponIssueService(userRepository, couponRepository, couponMessageQProducer,
+		couponApplyService = new CouponApplyService(userRepository, couponRepository, couponMessageQProducer,
 			couponTransactionHistoryRepository);
 	}
 
@@ -68,7 +68,7 @@ class CouponIssueServiceTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponIssueService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
+		couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
 
 		//then
 		assertThat(messageQ.size()).isEqualTo(1);
@@ -90,7 +90,7 @@ class CouponIssueServiceTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponIssueService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
+					couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime);
 				} finally {
 					latch.countDown();
 				}
@@ -114,7 +114,7 @@ class CouponIssueServiceTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> couponIssueService.applyCoupon(user.getId(), coupon.getId(), issueDateTime))
+			() -> couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("쿠폰이 모두 소진되어 발급할 수 없습니다.");
 	}
@@ -131,7 +131,7 @@ class CouponIssueServiceTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> couponIssueService.applyCoupon(user.getId(), coupon.getId(), issueDateTime))
+			() -> couponApplyService.applyCoupon(user.getId(), coupon.getId(), issueDateTime))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID, 이름 : " + user.getId() + ", "
 				+ user.getName());

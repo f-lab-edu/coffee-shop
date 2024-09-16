@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class CouponIssueService {
+public class CouponApplyService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;
 	private final CouponProducer couponMessageQProducer;
