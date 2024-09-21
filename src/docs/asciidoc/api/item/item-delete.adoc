@@ -1,0 +1,12 @@
+[[item-delete]]
+=== 상품 삭제
+
+==== HTTP Request
+
+include::{snippets}/item/delete/http-request.adoc[]
+include::{snippets}/item/delete/path-parameters.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/item/delete/http-response.adoc[]
+include::{snippets}/item/delete/response-fields.adoc[]
