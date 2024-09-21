@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.controller.coupon.api;
+package com.coffee_shop.coffeeshop.controller.coupon;
 
 import java.net.URI;
 
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coffee_shop.coffeeshop.common.dto.response.ApiResponse;
-import com.coffee_shop.coffeeshop.controller.coupon.api.dto.request.CouponSaveRequest;
+import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponSaveRequest;
 import com.coffee_shop.coffeeshop.service.coupon.CouponService;
 
 import lombok.RequiredArgsConstructor;

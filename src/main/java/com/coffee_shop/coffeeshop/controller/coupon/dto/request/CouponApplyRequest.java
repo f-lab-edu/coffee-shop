@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.controller.coupon.api.dto.request;
+package com.coffee_shop.coffeeshop.controller.coupon.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
