@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import com.coffee_shop.coffeeshop.common.domain.BaseTimeEntity;
 import com.coffee_shop.coffeeshop.domain.order.Order;
@@ -25,7 +26,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "coupon_transaction_histories")
+@Table(
+	name = "coupon_transaction_histories",
+	uniqueConstraints = {
+		@UniqueConstraint(name = "COUPON_USER_ORDER_UNIQUE", columnNames = {"coupon_id", "user_id", "order_id"})}
+)
 public class CouponTransactionHistory extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
