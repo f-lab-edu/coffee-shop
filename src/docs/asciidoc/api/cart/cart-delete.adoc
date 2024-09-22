@@ -1,0 +1,13 @@
+[[cart-delete]]
+=== 장바구니 상품 삭제
+
+==== HTTP Request
+
+include::{snippets}/cart/delete/http-request.adoc[]
+include::{snippets}/cart/delete/path-parameters.adoc[]
+include::{snippets}/cart/delete/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/cart/delete/http-response.adoc[]
+include::{snippets}/cart/delete/response-fields.adoc[]

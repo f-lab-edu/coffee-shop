@@ -1,0 +1,7 @@
+[[Cart-API]]
+== Cart API
+
+include::cart-update.adoc[]
+include::cart-findAll.adoc[]
+include::cart-delete.adoc[]
+

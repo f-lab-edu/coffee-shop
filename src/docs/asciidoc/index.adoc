@@ -11,3 +11,4 @@ endif::[]
 
 include::api/coupon/coupon.adoc[]
 include::api/item/item.adoc[]
+include::api/cart/cart.adoc[]

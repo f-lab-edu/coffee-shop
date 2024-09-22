@@ -1,0 +1,13 @@
+[[cart-update]]
+=== 장바구니 상품 담기 & 수정
+
+==== HTTP Request
+
+include::{snippets}/cart/update/http-request.adoc[]
+include::{snippets}/cart/update/path-parameters.adoc[]
+include::{snippets}/cart/update/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/cart/update/http-response.adoc[]
+include::{snippets}/cart/update/response-fields.adoc[]
