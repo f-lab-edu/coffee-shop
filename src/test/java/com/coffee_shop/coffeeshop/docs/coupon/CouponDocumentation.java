@@ -55,10 +55,8 @@ public class CouponDocumentation {
 			preprocessRequest(prettyPrint()),
 			preprocessResponse(prettyPrint()),
 			requestFields(
-				fieldWithPath("userId").type(JsonFieldType.NUMBER).description("사용자 ID")
-					.attributes(key("constraints").value("양수")),
+				fieldWithPath("userId").type(JsonFieldType.NUMBER).description("사용자 ID"),
 				fieldWithPath("couponId").type(JsonFieldType.NUMBER).description("쿠폰 ID")
-					.attributes(key("constraints").value("양수"))
 			),
 			responseFields(
 				fieldWithPath("code").type(JsonFieldType.STRING)
