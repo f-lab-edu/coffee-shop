@@ -12,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import com.coffee_shop.coffeeshop.common.domain.BaseTimeEntity;
+import com.coffee_shop.coffeeshop.service.item.dto.request.ItemSaveServiceRequest;
+import com.coffee_shop.coffeeshop.service.item.dto.request.ItemUpdateServiceRequest;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -48,15 +50,19 @@ public class Item extends BaseTimeEntity {
 		this.lastModifiedDateTime = lastModifiedDateTime;
 	}
 
-	public Item create(LocalDateTime lastModifiedDateTime) {
-		this.lastModifiedDateTime = lastModifiedDateTime;
-		return this;
+	public static Item of(ItemSaveServiceRequest request, LocalDateTime lastModifiedDateTime) {
+		return Item.builder()
+			.name(request.getName())
+			.itemType(request.getItemType())
+			.price(request.getPrice())
+			.lastModifiedDateTime(lastModifiedDateTime)
+			.build();
 	}
 
-	public Item update(Item item, LocalDateTime lastModifiedDateTime) {
-		this.name = item.name;
-		this.itemType = item.itemType;
-		this.price = item.price;
+	public Item update(ItemUpdateServiceRequest request, LocalDateTime lastModifiedDateTime) {
+		this.name = request.getName();
+		this.itemType = request.getItemType();
+		this.price = request.getPrice();
 		this.lastModifiedDateTime = lastModifiedDateTime;
 		return this;
 	}

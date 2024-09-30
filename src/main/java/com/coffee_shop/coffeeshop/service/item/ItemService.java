@@ -26,7 +26,7 @@ public class ItemService {
 
 	@Transactional
 	public Long createItem(ItemSaveServiceRequest request, LocalDateTime lastModifiedDateTime) {
-		Item item = request.toEntity().create(lastModifiedDateTime);
+		Item item = Item.of(request, lastModifiedDateTime);
 		Item savedItem = itemRepository.save(item);
 		return savedItem.getId();
 	}
@@ -34,7 +34,7 @@ public class ItemService {
 	@Transactional
 	public void updateItem(Long itemId, ItemUpdateServiceRequest request, LocalDateTime updatedModifiedDateTime) {
 		Item item = findItemById(itemId);
-		item.update(request.toEntity(), updatedModifiedDateTime);
+		item.update(request, updatedModifiedDateTime);
 	}
 
 	@Transactional

@@ -1,6 +1,5 @@
 package com.coffee_shop.coffeeshop.service.coupon.dto.request;
 
-import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponType;
 
 import lombok.AccessLevel;
@@ -26,15 +25,4 @@ public class CouponSaveServiceRequest {
 		this.minOrderAmount = minOrderAmount;
 		this.maxIssueCount = maxIssueCount;
 	}
-
-	public Coupon toEntity() {
-		return Coupon.builder()
-			.name(name)
-			.type(type)
-			.discountAmount(discountAmount)
-			.minOrderAmount(minOrderAmount)
-			.maxIssueCount(maxIssueCount)
-			.build();
-	}
-
 }

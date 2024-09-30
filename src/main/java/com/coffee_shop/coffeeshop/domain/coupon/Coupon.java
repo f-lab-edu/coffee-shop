@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 
 import com.coffee_shop.coffeeshop.common.domain.BaseTimeEntity;
 import com.coffee_shop.coffeeshop.domain.cash.Cash;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponSaveServiceRequest;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -58,6 +59,16 @@ public class Coupon extends BaseTimeEntity {
 		this.minOrderAmount = minOrderAmount;
 		this.maxIssueCount = maxIssueCount;
 		this.issuedCount = issuedCount;
+	}
+
+	public static Coupon of(CouponSaveServiceRequest request) {
+		return Coupon.builder()
+			.name(request.getName())
+			.type(request.getType())
+			.discountAmount(request.getDiscountAmount())
+			.minOrderAmount(request.getMinOrderAmount())
+			.maxIssueCount(request.getMaxIssueCount())
+			.build();
 	}
 
 	private Cash convertDiscountAmount(CouponType type, int discountAmount) {

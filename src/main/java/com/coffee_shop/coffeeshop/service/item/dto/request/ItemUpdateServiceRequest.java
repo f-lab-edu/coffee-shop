@@ -1,12 +1,13 @@
 package com.coffee_shop.coffeeshop.service.item.dto.request;
 
-import com.coffee_shop.coffeeshop.domain.item.Item;
 import com.coffee_shop.coffeeshop.domain.item.ItemType;
 
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemUpdateServiceRequest {
 
@@ -21,13 +22,5 @@ public class ItemUpdateServiceRequest {
 		this.name = name;
 		this.itemType = itemType;
 		this.price = price;
-	}
-
-	public Item toEntity() {
-		return Item.builder()
-			.name(name)
-			.itemType(itemType)
-			.price(price)
-			.build();
 	}
 }

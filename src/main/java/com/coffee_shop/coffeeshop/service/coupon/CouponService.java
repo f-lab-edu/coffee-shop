@@ -17,7 +17,7 @@ public class CouponService {
 
 	@Transactional
 	public Long createCoupon(CouponSaveServiceRequest request) {
-		Coupon savedCoupon = couponRepository.save(request.toEntity());
+		Coupon savedCoupon = couponRepository.save(Coupon.of(request));
 		return savedCoupon.getId();
 	}
 }
