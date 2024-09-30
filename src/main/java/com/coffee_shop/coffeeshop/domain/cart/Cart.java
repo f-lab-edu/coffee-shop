@@ -4,8 +4,10 @@ import static jakarta.persistence.FetchType.*;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,19 +23,26 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@IdClass(CartId.class)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "carts")
+@Table(
+	name = "carts",
+	indexes = {
+		@Index(name = "idx_user_item", columnList = "user_id, item_id")
+	}
+)
 public class Cart extends BaseTimeEntity {
 	private static final int MAX_ORDER_COUNT = 20;
+
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
 	@ManyToOne(fetch = LAZY, optional = false)
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@Id
 	@ManyToOne(fetch = LAZY, optional = false)
 	@JoinColumn(name = "item_id")
 	private Item item;
