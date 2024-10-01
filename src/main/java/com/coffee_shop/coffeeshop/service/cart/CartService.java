@@ -1,6 +1,7 @@
 package com.coffee_shop.coffeeshop.service.cart;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,15 +34,16 @@ public class CartService {
 		Item item = findItem(request.getItemId());
 		User user = findUser(userId);
 
-		List<Cart> cartItems = cartRepository.findByUserIdFetchJoin(user.getId());
+		List<Cart> cartItems = cartRepository.findByUser(user);
 		Carts carts = new Carts(cartItems);
 
 		if (carts.isOverMaxOrderCount(request.getCount())) {
 			throw new BusinessException(ErrorCode.OVER_MAX_ORDER_COUNT);
 		}
 
-		if (carts.containsItem(item.getId())) {
-			Cart cart = cartRepository.findByUserAndItem(user, item);
+		Optional<Cart> optionalCart = cartRepository.findByUserAndItem(user, item);
+		if (optionalCart.isPresent()) {
+			Cart cart = optionalCart.get();
 			cart.addCount(request.getCount());
 			return CartResponse.of(cart);
 		}
@@ -52,11 +54,14 @@ public class CartService {
 
 	@Transactional
 	public void deleteCartItem(Long userId, CartDeleteServiceRequest request) {
-		cartRepository.deleteByUserIdAndItemId(userId, request.getItemId());
+		User user = findUser(userId);
+		Item item = findItem(request.getItemId());
+		cartRepository.deleteByUserAndItem(user, item);
 	}
 
 	public List<CartResponse> findCartItems(Long userId) {
-		List<Cart> cartItems = cartRepository.findByUserIdFetchJoin(userId);
+		User user = findUser(userId);
+		List<Cart> cartItems = cartRepository.findByUserFetchJoin(user);
 		return CartResponse.listOf(cartItems);
 	}
 
