@@ -1,0 +1,9 @@
+[[Item-API]]
+== Item API
+
+include::item-create.adoc[]
+include::item-update.adoc[]
+include::item-findAll.adoc[]
+include::item-find.adoc[]
+include::item-delete.adoc[]
+

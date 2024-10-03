@@ -1,0 +1,12 @@
+[[item-find]]
+=== 상품 상세조회
+
+==== HTTP Request
+
+include::{snippets}/item/find/http-request.adoc[]
+include::{snippets}/item/find/path-parameters.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/item/find/http-response.adoc[]
+include::{snippets}/item/find/response-fields.adoc[]

@@ -1,0 +1,12 @@
+[[item-findAll]]
+=== 상품 리스트 조회
+
+==== HTTP Request
+
+include::{snippets}/item/findAll/http-request.adoc[]
+include::{snippets}/item/findAll/query-parameters.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/item/findAll/http-response.adoc[]
+include::{snippets}/item/findAll/response-fields.adoc[]

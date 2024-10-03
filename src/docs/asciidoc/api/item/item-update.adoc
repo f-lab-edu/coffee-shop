@@ -1,0 +1,13 @@
+[[item-update]]
+=== 상품 정보 수정
+
+==== HTTP Request
+
+include::{snippets}/item/update/http-request.adoc[]
+include::{snippets}/item/update/path-parameters.adoc[]
+include::{snippets}/item/update/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/item/update/http-response.adoc[]
+include::{snippets}/item/update/response-fields.adoc[]

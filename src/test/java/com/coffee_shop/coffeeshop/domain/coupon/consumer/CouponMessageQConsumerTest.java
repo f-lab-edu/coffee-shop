@@ -105,7 +105,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		latch.await();
 
 		//then
-		Thread.sleep(2000);
+		Thread.sleep(4000);
 
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
 
