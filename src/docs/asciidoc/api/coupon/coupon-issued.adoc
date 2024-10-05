@@ -1,0 +1,13 @@
+[[coupon-issued]]
+=== 쿠폰 발급 결과 조회
+
+==== HTTP Request
+
+include::{snippets}/coupon/issued/http-request.adoc[]
+include::{snippets}/coupon/issued/path-parameters.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/coupon/issued/http-response.adoc[]
+include::{snippets}/coupon/issued/response-fields.adoc[]
+

@@ -24,7 +24,6 @@ public class CouponMessageQConsumer implements CouponConsumer {
 	@Scheduled(cron = "0/1 * * * * *")
 	public synchronized void issueCoupon() {
 		while (!messageQ.isEmpty()) {
-			//발급 신청이 존재하면 발급 처리
 			CouponApplication couponApplication = messageQ.takeMessage();
 			try {
 				couponIssueService.issueCoupon(couponApplication);

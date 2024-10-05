@@ -3,5 +3,6 @@
 
 include::coupon-create.adoc[]
 include::coupon-apply.adoc[]
+include::coupon-issued.adoc[]
 
 
