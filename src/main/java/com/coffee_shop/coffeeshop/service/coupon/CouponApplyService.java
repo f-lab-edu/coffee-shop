@@ -30,15 +30,12 @@ public class CouponApplyService {
 		User user = findUser(request.getUserId());
 		Coupon coupon = findCoupon(request.getCouponId());
 
-		//발급할 수 있는 쿠폰개수를 확인한다.
 		if (!coupon.canIssueCoupon()) {
 			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
 		}
 
-		//이미 발급된 쿠폰인지 확인
 		checkDuplicateIssuedCoupon(coupon, user);
 
-		//발급 신청 -> 큐에 넣기
 		couponMessageQProducer.applyCoupon(user, coupon, issueDateTime);
 	}
 

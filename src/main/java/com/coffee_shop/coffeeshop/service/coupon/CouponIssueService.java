@@ -29,18 +29,14 @@ public class CouponIssueService {
 		Coupon coupon = findCoupon(couponApplication.getCouponId());
 		User user = findUser(couponApplication.getUserId());
 
-		//발급할 수 있는 쿠폰개수를 확인한다.
 		if (!coupon.canIssueCoupon()) {
 			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
 		}
 
-		//이미 발급된 쿠폰인지 확인
 		checkDuplicateIssuedCoupon(coupon, user);
 
-		//발급 count +1
 		coupon.issueCoupon();
 
-		//이력 저장
 		couponTransactionHistoryRepository.save(
 			CouponTransactionHistory.issueCoupon(user, coupon, couponApplication.getIssueDateTime()));
 	}
