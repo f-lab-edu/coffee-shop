@@ -1,6 +1,7 @@
 package com.coffee_shop.coffeeshop.service.coupon;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,16 +9,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponProducer;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.exception.ErrorCode;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.IssuedCouponResponse;
 
 import lombok.RequiredArgsConstructor;
 
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
 public class CouponApplyService {
@@ -26,6 +29,20 @@ public class CouponApplyService {
 	private final CouponProducer couponMessageQProducer;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
+	public IssuedCouponResponse isCouponIssued(Long userId, Long couponId) {
+		User user = findUser(userId);
+		Coupon coupon = findCoupon(couponId);
+		Optional<CouponTransactionHistory> history = couponTransactionHistoryRepository.findByCouponAndUser(
+			coupon, user);
+		
+		if (history.isPresent()) {
+			return IssuedCouponResponse.createSuccessResponse(history.get());
+		}
+
+		return IssuedCouponResponse.createFailResponse();
+	}
+
+	@Transactional
 	public void applyCoupon(CouponApplyServiceRequest request, LocalDateTime issueDateTime) {
 		User user = findUser(request.getUserId());
 		Coupon coupon = findCoupon(request.getCouponId());
