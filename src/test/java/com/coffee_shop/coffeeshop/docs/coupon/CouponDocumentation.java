@@ -4,10 +4,12 @@ import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.snippet.Attributes.*;
 
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.web.servlet.ResultHandler;
 
 public class CouponDocumentation {
 	public static RestDocumentationResultHandler createCoupon() {
@@ -72,5 +74,27 @@ public class CouponDocumentation {
 				headerWithName("Location").description("쿠폰 발급 결과 URI")
 			)
 		);
+	}
+
+	public static ResultHandler isIssuedCoupon() {
+		return document("coupon/issued",
+			preprocessResponse(prettyPrint()),
+			pathParameters(
+				parameterWithName("userId").description("사용자 ID"),
+				parameterWithName("couponId").description("쿠폰 ID")
+			),
+			responseFields(
+				fieldWithPath("code").type(JsonFieldType.STRING)
+					.description("코드"),
+				fieldWithPath("message").type(JsonFieldType.STRING)
+					.description("메시지"),
+				fieldWithPath("data").type(JsonFieldType.OBJECT)
+					.description("응답 데이터"),
+				fieldWithPath("data.result").type(JsonFieldType.STRING)
+					.description("쿠폰 발급 결과")
+					.attributes(key("constraints").value("SUCCESS(발급완료) / FAIL(발급전)")),
+				fieldWithPath("data.issuedDateTime").type(JsonFieldType.STRING)
+					.description("발급일")
+			));
 	}
 }

@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
+import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryRepository;
@@ -27,6 +28,7 @@ import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.IssuedCouponResponse;
 
 class CouponApplyServiceTest extends IntegrationTestSupport {
 
@@ -64,8 +66,8 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 	@Test
 	void applyCoupon() {
 		//given
-		Coupon coupon = couponRepository.save(createCoupon(10, 0));
-		User user = userRepository.save(createUser());
+		Coupon coupon = createCoupon(10, 0);
+		User user = createUser();
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
@@ -80,8 +82,8 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 	void applyCoupons() throws InterruptedException {
 		//given
 		int maxIssueCount = 1000;
-		Coupon coupon = couponRepository.save(createCoupon(maxIssueCount, 0));
-		User user = userRepository.save(createUser());
+		Coupon coupon = createCoupon(maxIssueCount, 0);
+		User user = createUser();
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
@@ -108,8 +110,8 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 	@Test
 	public void applyCouponWhenCouponLimitReached() {
 		//given
-		Coupon coupon = couponRepository.save(createCoupon(10, 10));
-		User user = userRepository.save(createUser());
+		Coupon coupon = createCoupon(10, 10);
+		User user = createUser();
 
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
@@ -124,11 +126,11 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 	@Test
 	public void applyCouponToUniqueUser() {
 		//given
-		Coupon coupon = couponRepository.save(createCoupon(10, 0));
-		User user = userRepository.save(createUser());
+		Coupon coupon = createCoupon(10, 0);
+		User user = createUser();
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
-		couponTransactionHistoryRepository.save(createCouponTransactionHistory(coupon, user, issueDateTime));
+		createCouponTransactionHistory(coupon, user, issueDateTime);
 
 		//when, then
 		assertThatThrownBy(
@@ -136,6 +138,40 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID, 이름 : " + user.getId() + ", "
 				+ user.getName());
+	}
+
+	@DisplayName("쿠폰 발급 이력이 있다면 성공으로 조회된다.")
+	@Test
+	void successCouponIssued() {
+		//given
+		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
+		Coupon coupon = createCoupon(10, 0);
+		User user = createUser();
+
+		createCouponTransactionHistory(coupon, user, issueDateTime);
+
+		//when
+		IssuedCouponResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
+
+		//then
+		assertThat(response.getResult()).isEqualTo(CouponIssueStatus.SUCCESS);
+		assertThat(response.getIssuedDateTime()).isEqualTo(issueDateTime);
+	}
+
+	@DisplayName("쿠폰 발급 이력이 없다면 실패로 조회된다.")
+	@Test
+	void failCouponIssued() {
+		//given
+		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
+		Coupon coupon = createCoupon(10, 0);
+		User user = createUser();
+
+		//when
+		IssuedCouponResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
+
+		//then
+		assertThat(response.getResult()).isEqualTo(CouponIssueStatus.FAIL);
+		assertThat(response.getIssuedDateTime()).isNull();
 	}
 
 	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
@@ -147,15 +183,17 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 
 	private CouponTransactionHistory createCouponTransactionHistory(Coupon coupon, User user,
 		LocalDateTime issueDateTime) {
-		return CouponTransactionHistory.builder()
+		CouponTransactionHistory history = CouponTransactionHistory.builder()
 			.user(user)
 			.coupon(coupon)
 			.issueDateTime(issueDateTime)
 			.build();
+
+		return couponTransactionHistoryRepository.save(history);
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {
-		return Coupon.builder()
+		Coupon coupon = Coupon.builder()
 			.name("오픈기념 선착순 할인 쿠폰")
 			.type(AMOUNT)
 			.discountAmount(1000)
@@ -163,11 +201,13 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 			.maxIssueCount(maxIssueCount)
 			.issuedCount(issuedCount)
 			.build();
+		return couponRepository.save(coupon);
 	}
 
 	private User createUser() {
-		return User.builder()
+		User user = User.builder()
 			.name("우경서")
 			.build();
+		return userRepository.save(user);
 	}
 }
