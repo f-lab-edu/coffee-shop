@@ -31,4 +31,5 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     scrape_interval: 20s
     static_configs:
-      - targets: [ 'app1:8080', 'app2:8080' ]
+      - targets: [ 'app1:8080' ]
+#      - targets: [ 'app1:8080', 'app2:8080' ]

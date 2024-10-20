@@ -1,16 +1,16 @@
 services:
-  nginx:
-    container_name: nginx
-    image: nginx:stable-alpine
-    depends_on:
-      - web-application-server-1
-      - web-application-server-2
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - ${APP_PORT:-80}:80
-    networks:
-      - coffeeshop
+  #  nginx:
+  #    container_name: nginx
+  #    image: nginx:stable-alpine
+  #    depends_on:
+  #      - web-application-server-1
+  #      - web-application-server-2
+  #    volumes:
+  #      - ./nginx.conf:/etc/nginx/nginx.conf
+  #    ports:
+  #      - ${APP_PORT:-80}:80
+  #    networks:
+  #      - coffeeshop
 
   web-application-server-1:
     container_name: app1
@@ -24,17 +24,17 @@ services:
     depends_on:
       - mariadb
 
-  web-application-server-2:
-    container_name: app2
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 8082:8080
-    networks:
-      - coffeeshop
-    depends_on:
-      - mariadb
+  #  web-application-server-2:
+  #    container_name: app2
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - 8082:8080
+  #    networks:
+  #      - coffeeshop
+  #    depends_on:
+  #      - mariadb
 
   mariadb:
     container_name: mariadb
