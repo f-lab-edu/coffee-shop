@@ -57,6 +57,17 @@ services:
       retries: 3
       timeout: 5s
 
+
+  redis:
+    container_name: redis
+    image: redis
+    ports:
+      - ${FORWARD_REDIS_PORT:-6379}:6379
+    networks:
+      - coffeeshop
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
