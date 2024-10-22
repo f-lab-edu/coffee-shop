@@ -24,17 +24,17 @@ services:
     depends_on:
       - mariadb
 
-    web-application-server-2:
-      container_name: app2
-      build:
-        context: .
-        dockerfile: Dockerfile
-      ports:
-        - 8082:8080
-      networks:
-        - coffeeshop
-      depends_on:
-        - mariadb
+  web-application-server-2:
+    container_name: app2
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8082:8080
+    networks:
+      - coffeeshop
+    depends_on:
+      - mariadb
 
   mariadb:
     container_name: mariadb
