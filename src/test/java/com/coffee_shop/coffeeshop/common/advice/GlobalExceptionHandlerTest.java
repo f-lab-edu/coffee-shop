@@ -65,6 +65,19 @@ class GlobalExceptionHandlerTest extends RestDocsSupport {
 			.andExpect(jsonPath("$.message").value("해당 데이터를 찾을 수 없습니다."));
 	}
 
+	@DisplayName("비즈니스 예외에 에러 메시지를 지정할 경우 지정된 에러 메시지가 노출된다.")
+	@Test
+	void handleBusinessExceptionWithCustomMessage() throws Exception {
+		mockMvc.perform(
+				get("/exception/error-message/1")
+					.accept(MediaType.APPLICATION_JSON)
+			)
+			.andDo(print())
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("ENTITY_NOT_FOUND"))
+			.andExpect(jsonPath("$.message").value("해당 데이터를 찾을 수 없습니다. ID = 1"));
+	}
+
 	@DisplayName("비즈니스 예외 이외의 예외를 처리한다.")
 	@Test
 	void handleException() throws Exception {
@@ -101,6 +114,11 @@ class GlobalExceptionHandlerTest extends RestDocsSupport {
 		@GetMapping("/{id}")
 		public String executeBusinessException(@PathVariable Long id) {
 			throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND);
+		}
+
+		@GetMapping("/error-message/{id}")
+		public String executeBusinessExceptionWithCustomMessage(@PathVariable Long id) {
+			throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "ID = " + id);
 		}
 
 		@PostMapping

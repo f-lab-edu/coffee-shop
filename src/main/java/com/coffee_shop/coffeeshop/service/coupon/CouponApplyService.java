@@ -60,8 +60,7 @@ public class CouponApplyService {
 		couponTransactionHistoryRepository.findByCouponAndUser(coupon, user)
 			.ifPresent(couponTransactionHistory -> {
 				throw new BusinessException(ErrorCode.COUPON_DUPLICATE_ISSUE,
-					ErrorCode.COUPON_DUPLICATE_ISSUE.getMessage() + " 사용자 ID, 이름 : " + user.getId() + ", "
-						+ user.getName());
+					"사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
 			});
 	}
 

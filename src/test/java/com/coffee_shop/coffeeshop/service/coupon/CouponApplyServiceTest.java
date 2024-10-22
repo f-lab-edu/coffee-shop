@@ -136,8 +136,7 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 		assertThatThrownBy(
 			() -> couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime))
 			.isInstanceOf(BusinessException.class)
-			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID, 이름 : " + user.getId() + ", "
-				+ user.getName());
+			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
 	}
 
 	@DisplayName("쿠폰 발급 이력이 있다면 성공으로 조회된다.")
