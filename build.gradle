@@ -31,6 +31,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //mariadb
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.1'
 
     //lombok
     compileOnly 'org.projectlombok:lombok'
@@ -55,10 +60,18 @@ dependencies {
 
     // p6spy
     implementation "com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1"
+
+    // prometheus
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+jar {
+    enabled = false
 }
 
 //---- 아래 부분 모두 추가

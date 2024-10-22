@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(BusinessException.class)
 	protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
 		ErrorCode errorCode = exception.getErrorCode();
-		ErrorResponse response = ErrorResponse.of(errorCode);
+		ErrorResponse response = ErrorResponse.of(errorCode, exception.getMessage());
 		return new ResponseEntity<>(response, errorCode.getHttpStatus());
 	}
 

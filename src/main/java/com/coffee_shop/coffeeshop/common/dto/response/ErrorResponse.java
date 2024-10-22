@@ -30,9 +30,17 @@ public class ErrorResponse extends CommonResponse {
 		this.fieldErrors = new ArrayList<>();
 	}
 
+	private ErrorResponse(ErrorCode errorCode, String message) {
+		super(errorCode.getCode(), message);
+		this.fieldErrors = new ArrayList<>();
+	}
+
 	public static ErrorResponse of(ErrorCode errorCode) {
 		return new ErrorResponse(errorCode);
+	}
 
+	public static ErrorResponse of(ErrorCode errorCode, String message) {
+		return new ErrorResponse(errorCode, message);
 	}
 
 	public static ErrorResponse of(ErrorCode errorCode, BindingResult bindingResult) {
