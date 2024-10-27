@@ -6,8 +6,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -21,7 +19,7 @@ import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponApplyReque
 import com.coffee_shop.coffeeshop.docs.coupon.CouponDocumentation;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.service.coupon.CouponApplyService;
-import com.coffee_shop.coffeeshop.service.coupon.dto.response.IssuedCouponResponse;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 @WebMvcTest(controllers = CouponApplyController.class)
 class CouponApplyControllerTest extends RestDocsSupport {
@@ -148,12 +146,12 @@ class CouponApplyControllerTest extends RestDocsSupport {
 	@Test
 	void isIssuedCoupon() throws Exception {
 		//given
-		IssuedCouponResponse issuedCouponResponse = IssuedCouponResponse.builder()
-			.result(CouponIssueStatus.SUCCESS)
-			.issuedDateTime(LocalDateTime.now())
+		CouponApplyResponse couponApplyResponse = CouponApplyResponse.builder()
+			.couponIssueStatus(CouponIssueStatus.SUCCESS)
+			.position(-1)
 			.build();
 
-		when(couponApplyService.isCouponIssued(any(), any())).thenReturn(issuedCouponResponse);
+		when(couponApplyService.isCouponIssued(any(), any())).thenReturn(couponApplyResponse);
 
 		//when //then
 		mockMvc.perform(
