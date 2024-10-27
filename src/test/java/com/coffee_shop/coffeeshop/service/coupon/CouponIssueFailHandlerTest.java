@@ -70,8 +70,8 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 	void failIssueCoupon() throws InterruptedException {
 		//given
 		int maxFailCount = 3;
-		Coupon coupon = couponRepository.save(createCoupon(10, 0));
-		User user = userRepository.save(createUser());
+		Coupon coupon = createCoupon(10, 0);
+		User user = createUser();
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(any(CouponApplication.class));
@@ -111,7 +111,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		int maxIssueCount = 1000;
 		int maxFailCount = 3;
 
-		Coupon coupon = couponRepository.save(createCoupon(maxIssueCount, 0));
+		Coupon coupon = createCoupon(maxIssueCount, 0);
 
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
@@ -124,7 +124,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		//10명 유저 생성
 		Queue<Long> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
-			User user = userRepository.save(createUser());
+			User user = createUser();
 			users.add(user.getId());
 			if (i == 0) {
 				exceptionUserId = user.getId();
@@ -135,7 +135,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(CouponApplication.builder()
 				.userId(exceptionUserId)
 				.couponId(coupon.getId())
-				.issueDateTime(issueDateTime)
+				.couponRequestDateTime(issueDateTime)
 				.failCount(i)
 				.build());
 		}
@@ -177,7 +177,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		int maxIssueCount = 1000;
 		int maxFailCount = 3;
 
-		Coupon coupon = couponRepository.save(createCoupon(maxIssueCount, 0));
+		Coupon coupon = createCoupon(maxIssueCount, 0);
 
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
@@ -190,7 +190,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		//1000명 유저 생성
 		Queue<Long> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
-			User user = userRepository.save(createUser());
+			User user = createUser();
 			users.add(user.getId());
 			if (i == 2) {
 				exceptionUserId = user.getId();
@@ -201,7 +201,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(CouponApplication.builder()
 				.userId(exceptionUserId)
 				.couponId(coupon.getId())
-				.issueDateTime(issueDateTime)
+				.couponRequestDateTime(issueDateTime)
 				.failCount(i)
 				.build());
 		}
@@ -251,7 +251,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {
-		return Coupon.builder()
+		Coupon coupon = Coupon.builder()
 			.name("오픈기념 선착순 할인 쿠폰")
 			.type(AMOUNT)
 			.discountAmount(1000)
@@ -259,12 +259,14 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			.maxIssueCount(maxIssueCount)
 			.issuedCount(issuedCount)
 			.build();
+		return couponRepository.save(coupon);
 	}
 
 	private User createUser() {
-		return User.builder()
+		User user = User.builder()
 			.name("우경서")
 			.build();
+		return userRepository.save(user);
 	}
 
 }
