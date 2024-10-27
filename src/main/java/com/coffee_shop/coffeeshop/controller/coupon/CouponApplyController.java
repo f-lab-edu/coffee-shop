@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.coffee_shop.coffeeshop.common.dto.response.ApiResponse;
 import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponApplyRequest;
 import com.coffee_shop.coffeeshop.service.coupon.CouponApplyService;
-import com.coffee_shop.coffeeshop.service.coupon.dto.response.IssuedCouponResponse;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,8 +33,8 @@ public class CouponApplyController {
 	}
 
 	@GetMapping("/api/users/{userId}/coupons/{couponId}")
-	public ApiResponse<IssuedCouponResponse> isCouponIssued(@PathVariable Long userId, @PathVariable Long couponId) {
-		IssuedCouponResponse response = couponApplyService.isCouponIssued(userId, couponId);
+	public ApiResponse<CouponApplyResponse> isCouponIssued(@PathVariable Long userId, @PathVariable Long couponId) {
+		CouponApplyResponse response = couponApplyService.isCouponIssued(userId, couponId);
 		return ApiResponse.ok(response);
 	}
 }
