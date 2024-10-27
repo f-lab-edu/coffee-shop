@@ -22,4 +22,8 @@ public class CouponApplyResponse {
 			.position(position)
 			.build();
 	}
+
+	public static CouponApplyResponse of(CouponIssueStatus couponIssueStatus) {
+		return of(couponIssueStatus, -1);
+	}
 }

@@ -38,12 +38,12 @@ public class CouponApplyService {
 			coupon, user);
 
 		if (history.isPresent()) {
-			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS, -1);
+			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS);
 		}
 
 		int position = couponMessageQProducer.getPosition(userId, couponId);
-		if (position == -1) {
-			return CouponApplyResponse.of(CouponIssueStatus.FAILURE, -1);
+		if (couponMessageQProducer.isPositionNotFound(position)) {
+			return CouponApplyResponse.of(CouponIssueStatus.FAILURE);
 		}
 
 		return CouponApplyResponse.of(CouponIssueStatus.IN_PROGRESS, position);

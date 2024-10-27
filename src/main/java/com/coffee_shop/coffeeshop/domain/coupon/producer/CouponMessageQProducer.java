@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class CouponMessageQProducer implements CouponProducer {
+	private static final int POSITION_NOT_FOUND = -1;
 
 	private final MessageQ messageQ;
 
@@ -36,7 +37,12 @@ public class CouponMessageQProducer implements CouponProducer {
 			}
 		}
 
-		return -1;
+		return POSITION_NOT_FOUND;
+	}
+
+	@Override
+	public boolean isPositionNotFound(int position) {
+		return position == POSITION_NOT_FOUND;
 	}
 
 	private boolean isMatchingApplication(Long userId, Long couponId, CouponApplication application) {
