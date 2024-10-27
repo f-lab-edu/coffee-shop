@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
+import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryRepository;
@@ -16,7 +17,7 @@ import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.exception.ErrorCode;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
-import com.coffee_shop.coffeeshop.service.coupon.dto.response.IssuedCouponResponse;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,17 +30,24 @@ public class CouponApplyService {
 	private final CouponProducer couponMessageQProducer;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
-	public IssuedCouponResponse isCouponIssued(Long userId, Long couponId) {
+	public CouponApplyResponse isCouponIssued(Long userId, Long couponId) {
 		User user = findUser(userId);
 		Coupon coupon = findCoupon(couponId);
+
 		Optional<CouponTransactionHistory> history = couponTransactionHistoryRepository.findByCouponAndUser(
 			coupon, user);
-		
+
 		if (history.isPresent()) {
-			return IssuedCouponResponse.createSuccessResponse(history.get());
+			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS, -1);
 		}
 
-		return IssuedCouponResponse.createFailResponse();
+		int position = couponMessageQProducer.getPosition(userId, couponId);
+		if (position == -1) {
+			return CouponApplyResponse.of(CouponIssueStatus.FAILURE, -1);
+		}
+
+		return CouponApplyResponse.of(CouponIssueStatus.IN_PROGRESS, position);
+
 	}
 
 	@Transactional
