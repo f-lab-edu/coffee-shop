@@ -1,5 +1,7 @@
 package com.coffee_shop.coffeeshop.service.coupon;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +40,7 @@ public class CouponIssueService {
 		coupon.issueCoupon();
 
 		couponTransactionHistoryRepository.save(
-			CouponTransactionHistory.issueCoupon(user, coupon, couponApplication.getIssueDateTime()));
+			CouponTransactionHistory.issueCoupon(user, coupon, LocalDateTime.now()));
 	}
 
 	private Coupon findCoupon(Long couponId) {
