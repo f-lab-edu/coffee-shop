@@ -1,5 +1,6 @@
 package com.coffee_shop.coffeeshop.domain.coupon;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -34,5 +35,9 @@ public class MessageQ {
 
 	public void addFirst(CouponApplication couponApplication) {
 		queue.addFirst(couponApplication);
+	}
+
+	public ArrayList<CouponApplication> toArrayList() {
+		return new ArrayList<>(queue);
 	}
 }

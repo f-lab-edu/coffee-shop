@@ -20,25 +20,26 @@ public class CouponApplication {
 
 	private Long couponId;
 
-	private LocalDateTime issueDateTime;
+	private LocalDateTime couponRequestDateTime;
 
 	private int failCount;
 
 	private List<Exception> exceptionList = new ArrayList<>();
 
 	@Builder
-	private CouponApplication(Long userId, Long couponId, LocalDateTime issueDateTime, int failCount) {
+	private CouponApplication(Long userId, Long couponId, LocalDateTime couponRequestDateTime, int failCount) {
 		this.userId = userId;
 		this.couponId = couponId;
-		this.issueDateTime = issueDateTime;
+		this.couponRequestDateTime = couponRequestDateTime;
 		this.failCount = failCount;
 	}
 
-	public static CouponApplication createCouponApplication(User user, Coupon coupon, LocalDateTime issueDateTime) {
+	public static CouponApplication createCouponApplication(User user, Coupon coupon,
+		LocalDateTime couponRequestDateTime) {
 		return CouponApplication.builder()
 			.userId(user.getId())
 			.couponId(coupon.getId())
-			.issueDateTime(issueDateTime)
+			.couponRequestDateTime(couponRequestDateTime)
 			.build();
 	}
 
@@ -58,13 +59,13 @@ public class CouponApplication {
 			return false;
 		CouponApplication that = (CouponApplication)o;
 		return getFailCount() == that.getFailCount() && Objects.equals(getUserId(), that.getUserId())
-			&& Objects.equals(getCouponId(), that.getCouponId()) && Objects.equals(getIssueDateTime(),
-			that.getIssueDateTime());
+			&& Objects.equals(getCouponId(), that.getCouponId()) && Objects.equals(getCouponRequestDateTime(),
+			that.getCouponRequestDateTime());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getUserId(), getCouponId(), getIssueDateTime(), getFailCount());
+		return Objects.hash(getUserId(), getCouponId(), getCouponRequestDateTime(), getFailCount());
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class CouponApplication {
 		return "CouponApplication{" +
 			"userId=" + userId +
 			", couponId=" + couponId +
-			", issueDateTime=" + issueDateTime +
+			", issueDateTime=" + couponRequestDateTime +
 			", failCount=" + failCount +
 			", exceptionList=" + exceptionList +
 			'}';

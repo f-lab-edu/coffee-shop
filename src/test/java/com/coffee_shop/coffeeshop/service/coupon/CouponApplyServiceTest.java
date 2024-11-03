@@ -4,6 +4,8 @@ import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,7 +30,7 @@ import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
-import com.coffee_shop.coffeeshop.service.coupon.dto.response.IssuedCouponResponse;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 class CouponApplyServiceTest extends IntegrationTestSupport {
 
@@ -139,9 +141,9 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
 	}
 
-	@DisplayName("쿠폰 발급 이력이 있다면 성공으로 조회된다.")
+	@DisplayName("쿠폰 발급이 완료된다면 발급 결과 조회시 발급 결과는 성공, 대기 순번은 -1로 반환된다.")
 	@Test
-	void successCouponIssued() {
+	void IssueCouponSuccessfully() {
 		//given
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 		Coupon coupon = createCoupon(10, 0);
@@ -150,27 +152,71 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 		createCouponTransactionHistory(coupon, user, issueDateTime);
 
 		//when
-		IssuedCouponResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
+		CouponApplyResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
 
 		//then
-		assertThat(response.getResult()).isEqualTo(CouponIssueStatus.SUCCESS);
-		assertThat(response.getIssuedDateTime()).isEqualTo(issueDateTime);
+		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.SUCCESS);
+		assertThat(response.getPosition()).isEqualTo(-1);
 	}
 
-	@DisplayName("쿠폰 발급 이력이 없다면 실패로 조회된다.")
+	@DisplayName("쿠폰 발급 실패한다면 발급 결과 조회시 발급 결과는 실패, 대기 순번은 -1로 반환된다.")
 	@Test
-	void failCouponIssued() {
+	void failToIssueCoupon() {
 		//given
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
 
 		//when
-		IssuedCouponResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
+		CouponApplyResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
 
 		//then
-		assertThat(response.getResult()).isEqualTo(CouponIssueStatus.FAIL);
-		assertThat(response.getIssuedDateTime()).isNull();
+		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.FAILURE);
+		assertThat(response.getPosition()).isEqualTo(-1);
+	}
+
+	@DisplayName("쿠폰 발급중이라면 발급 결과 조회시 발급 결과는 발급중, 현재 대기열 순번이 반환된다.")
+	@Test
+	void inProgressWhenCouponIsBeingIssued() throws InterruptedException {
+		//given
+		int maxIssueCount = 10;
+		Coupon coupon = createCoupon(10, 0);
+
+		ExecutorService executorService = Executors.newFixedThreadPool(32);
+		CountDownLatch latch = new CountDownLatch(maxIssueCount);
+
+		int expectedPosition = 3;
+		Long expectedUserId = null;
+		Queue<Long> users = new ConcurrentLinkedDeque<>();
+
+		for (int i = 0; i < maxIssueCount; i++) {
+			User user = createUser();
+			users.add(user.getId());
+			if (i == expectedPosition - 1) {
+				expectedUserId = user.getId();
+			}
+		}
+
+		for (int i = 0; i < maxIssueCount; i++) {
+			executorService.submit(() -> {
+				try {
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), LocalDateTime.now());
+				} finally {
+					latch.countDown();
+				}
+
+			});
+			Thread.sleep(1000);
+		}
+
+		latch.await();
+
+		//when
+		CouponApplyResponse response = couponApplyService.isCouponIssued(expectedUserId, coupon.getId());
+
+		//then
+		assertThat(messageQ.size()).isEqualTo(maxIssueCount);
+		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.IN_PROGRESS);
+		assertThat(response.getPosition()).isEqualTo(expectedPosition);
 	}
 
 	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {

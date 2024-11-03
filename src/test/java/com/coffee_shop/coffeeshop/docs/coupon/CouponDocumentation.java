@@ -90,11 +90,12 @@ public class CouponDocumentation {
 					.description("메시지"),
 				fieldWithPath("data").type(JsonFieldType.OBJECT)
 					.description("응답 데이터"),
-				fieldWithPath("data.result").type(JsonFieldType.STRING)
+				fieldWithPath("data.couponIssueStatus").type(JsonFieldType.STRING)
 					.description("쿠폰 발급 결과")
-					.attributes(key("constraints").value("SUCCESS(발급완료) / FAIL(발급전)")),
-				fieldWithPath("data.issuedDateTime").type(JsonFieldType.STRING)
-					.description("발급일")
+					.attributes(key("constraints").value("SUCCESS(발급완료) / IN_PROGRESS(발급중) / FAILURE(발급실패)")),
+				fieldWithPath("data.position").type(JsonFieldType.NUMBER)
+					.description("대기열 순번")
+					.attributes(key("constraints").value("SUCCESS, FAILURE 일때는 -1로 노출됩니다."))
 			));
 	}
 }
