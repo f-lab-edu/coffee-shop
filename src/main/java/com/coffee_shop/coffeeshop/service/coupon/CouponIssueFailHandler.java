@@ -29,10 +29,10 @@ public class CouponIssueFailHandler {
 	}
 
 	private void handleTooManyFails(CouponApplication couponApplication) {
-		log.info("최대 실패 횟수 " + MAX_FAIL_COUNT + "회를 초과하였습니다. 실패 횟수 : " + couponApplication.getFailCount());
+		log.info("최대 실패 횟수 {} 회를 초과하였습니다. 실패 횟수 : {}", MAX_FAIL_COUNT, couponApplication.getFailCount());
 		log.info("---------------------- 예외 리스트 START ----------------------");
 		List<Exception> exceptionList = couponApplication.getExceptionList();
-		log.info("실패한 메시지 : " + couponApplication);
+		log.info("실패한 메시지 : {}", couponApplication);
 		for (int i = 0; i < couponApplication.getExceptionList().size(); i++) {
 			Exception e = exceptionList.get(i);
 			e.printStackTrace();
