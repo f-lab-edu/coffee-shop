@@ -32,7 +32,7 @@ import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
-class CouponApplyServiceTest extends IntegrationTestSupport {
+class CouponApplyServiceImplTest extends IntegrationTestSupport {
 
 	@Autowired
 	private UserRepository userRepository;
@@ -53,7 +53,7 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 	void setUp() {
 		messageQ = new MessageQ();
 		CouponMessageQProducer couponMessageQProducer = new CouponMessageQProducer(messageQ);
-		couponApplyService = new CouponApplyService(userRepository, couponRepository, couponMessageQProducer,
+		couponApplyService = new CouponApplyServiceImpl(userRepository, couponRepository, couponMessageQProducer,
 			couponTransactionHistoryRepository);
 	}
 
