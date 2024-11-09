@@ -21,14 +21,14 @@ public class RedisQController {
 	private RedisQService redisQService;
 
 	@PostMapping("/enqueue")
-	public String enqueue(@RequestBody @Valid RedisQRequest data) {
-		redisQService.enqueue(data.getUserId());
-		return "Data enqueued: " + data.getUserId();
+	public String enqueue(@RequestBody @Valid RedisQRequest request) {
+		redisQService.enqueue(request.getUserId());
+		return "Data enqueued: " + request.getUserId();
 	}
 
 	@GetMapping("/dequeue")
 	public RedisQResponse dequeue() {
-		String data = redisQService.dequeue();
-		return new RedisQResponse(data);
+		Long userId = redisQService.dequeue();
+		return new RedisQResponse(userId);
 	}
 }

@@ -9,15 +9,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RedisQService {
 
-	private static final String QUEUE_NAME = "coupon-queue";
+	private static final String QUEUE_NAME = "stress-test-coupon-queue";
 
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, Long> redisTemplate;
 
-	public void enqueue(String data) {
-		redisTemplate.opsForList().rightPush(QUEUE_NAME, data);
+	public void enqueue(Long userId) {
+		redisTemplate.opsForList().rightPush(QUEUE_NAME, userId);
 	}
 
-	public String dequeue() {
-		return (String)redisTemplate.opsForList().leftPop(QUEUE_NAME);
+	public Long dequeue() {
+		return redisTemplate.opsForList().leftPop(QUEUE_NAME);
 	}
 }

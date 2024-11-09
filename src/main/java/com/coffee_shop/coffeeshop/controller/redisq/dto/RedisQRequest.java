@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 public class RedisQRequest {
 
 	@NotNull(message = "사용자 ID는 필수입니다.")
-	private String userId;
+	private Long userId;
 
 	@Builder
-	public RedisQRequest(String userId) {
+	private RedisQRequest(Long userId) {
 		this.userId = userId;
 	}
 }
