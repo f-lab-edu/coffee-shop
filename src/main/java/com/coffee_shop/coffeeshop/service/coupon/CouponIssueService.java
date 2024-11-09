@@ -31,7 +31,7 @@ public class CouponIssueService {
 		Coupon coupon = findCoupon(couponApplication.getCouponId());
 		User user = findUser(couponApplication.getUserId());
 
-		if (!coupon.canIssueCoupon()) {
+		if (!coupon.isCouponLimitExceeded()) {
 			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
 		}
 

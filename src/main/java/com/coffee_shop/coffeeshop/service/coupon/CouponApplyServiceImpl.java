@@ -55,7 +55,7 @@ public class CouponApplyServiceImpl implements CouponApplyService {
 		User user = findUser(request.getUserId());
 		Coupon coupon = findCoupon(request.getCouponId());
 
-		if (!coupon.canIssueCoupon()) {
+		if (!coupon.isCouponLimitExceeded()) {
 			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
 		}
 
