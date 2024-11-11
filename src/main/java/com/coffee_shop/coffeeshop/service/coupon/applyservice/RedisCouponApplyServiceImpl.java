@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.service.coupon;
+package com.coffee_shop.coffeeshop.service.coupon.applyservice;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

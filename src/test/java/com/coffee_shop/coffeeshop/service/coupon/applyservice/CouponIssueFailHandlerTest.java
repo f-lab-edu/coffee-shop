@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.service.coupon;
+package com.coffee_shop.coffeeshop.service.coupon.applyservice;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
@@ -27,6 +27,8 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
+import com.coffee_shop.coffeeshop.service.coupon.CouponIssueFailHandler;
+import com.coffee_shop.coffeeshop.service.coupon.CouponIssueService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 

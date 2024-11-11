@@ -18,7 +18,7 @@ import com.coffee_shop.coffeeshop.controller.coupon.CouponApplyController;
 import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponApplyRequest;
 import com.coffee_shop.coffeeshop.docs.coupon.CouponDocumentation;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
-import com.coffee_shop.coffeeshop.service.coupon.CouponApplyService;
+import com.coffee_shop.coffeeshop.service.coupon.applyservice.CouponApplyService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 @WebMvcTest(controllers = CouponApplyController.class)
