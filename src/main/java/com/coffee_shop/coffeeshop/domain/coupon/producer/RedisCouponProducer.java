@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class CouponRedisProducer implements CouponProducer {
+public class RedisCouponProducer implements CouponProducer {
 	private static final int POSITION_NOT_FOUND = -1;
 	private final CouponIssueRepository couponIssueRepository;
 

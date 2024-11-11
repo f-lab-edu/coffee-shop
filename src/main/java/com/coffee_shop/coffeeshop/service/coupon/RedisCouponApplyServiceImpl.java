@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class RedisCouponApplyServiceImpl implements CouponApplyService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;
-	private final CouponProducer couponRedisProducer;
+	private final CouponProducer redisCouponProducer;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 	private final CouponIssueCountRepository couponIssueCountRepository;
 	private final AppliedUserRepository appliedUserRepository;
@@ -48,8 +48,8 @@ public class RedisCouponApplyServiceImpl implements CouponApplyService {
 			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS);
 		}
 
-		int position = couponRedisProducer.getPosition(userId, couponId);
-		if (couponRedisProducer.isPositionNotFound(position)) {
+		int position = redisCouponProducer.getPosition(userId, couponId);
+		if (redisCouponProducer.isPositionNotFound(position)) {
 			return CouponApplyResponse.of(CouponIssueStatus.FAILURE);
 		}
 
@@ -67,7 +67,7 @@ public class RedisCouponApplyServiceImpl implements CouponApplyService {
 		Long couponCount = couponIssueCountRepository.increment(coupon.getId());
 		isCouponLimitExceeded(coupon, couponCount);
 
-		couponRedisProducer.applyCoupon(user, coupon, issueDateTime);
+		redisCouponProducer.applyCoupon(user, coupon, issueDateTime);
 	}
 
 	private void isCouponLimitExceeded(Coupon coupon, Long couponCount) {
