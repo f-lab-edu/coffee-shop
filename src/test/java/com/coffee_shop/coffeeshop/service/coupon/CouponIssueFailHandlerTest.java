@@ -148,6 +148,8 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			executorService.submit(() -> {
 				try {
 					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}
@@ -214,6 +216,8 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			executorService.submit(() -> {
 				try {
 					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}

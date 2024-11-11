@@ -97,6 +97,8 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 			executorService.submit(() -> {
 				try {
 					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}
@@ -140,6 +142,8 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 				try {
 					couponApplyService.applyCoupon(createRequest(waitingQ.remove(), coupon.getId()),
 						LocalDateTime.now());
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}

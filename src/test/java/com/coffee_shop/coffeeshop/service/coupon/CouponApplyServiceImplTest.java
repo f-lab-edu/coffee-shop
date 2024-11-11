@@ -85,8 +85,14 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		//given
 		int maxIssueCount = 1000;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
-		User user = createUser();
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
+
+		//1000명 유저 생성
+		Queue<Long> users = new ConcurrentLinkedDeque<>();
+		for (int i = 0; i < maxIssueCount; i++) {
+			User user = createUser();
+			users.add(user.getId());
+		}
 
 		//when
 		ExecutorService executorService = Executors.newFixedThreadPool(32);
@@ -95,7 +101,9 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}
@@ -200,6 +208,8 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 			executorService.submit(() -> {
 				try {
 					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), LocalDateTime.now());
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}
