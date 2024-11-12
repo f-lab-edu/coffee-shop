@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.coffee_shop.coffeeshop.domain.cash.Cash;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponSaveServiceRequest;
 

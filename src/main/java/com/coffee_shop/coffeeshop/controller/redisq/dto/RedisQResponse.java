@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class RedisQResponse {
-	private String userId;
+	private Long userId;
 
-	public RedisQResponse(String userId) {
+	public RedisQResponse(Long userId) {
 		this.userId = userId;
 	}
 }

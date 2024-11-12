@@ -11,7 +11,9 @@ import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class CouponMessageQProducer implements CouponProducer {
@@ -22,7 +24,13 @@ public class CouponMessageQProducer implements CouponProducer {
 	@Override
 	public void applyCoupon(User user, Coupon coupon, LocalDateTime issueDateTime) {
 		CouponApplication couponApplication = CouponApplication.createCouponApplication(user, coupon, issueDateTime);
-		messageQ.addMessage(couponApplication);
+		try {
+			messageQ.addMessage(couponApplication);
+		} catch (NullPointerException e) {
+			log.warn("Unable to insert null into coupon issuance queue, CouponApplication : {}", couponApplication);
+		} catch (Exception e) {
+			log.warn("Unable to insert into coupon issuance queue, CouponApplication : {}", couponApplication);
+		}
 	}
 
 	@Override

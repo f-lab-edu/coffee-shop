@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.service.coupon;
+package com.coffee_shop.coffeeshop.service.coupon.applyservice;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
@@ -20,19 +20,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
 import com.coffee_shop.coffeeshop.domain.coupon.consumer.CouponConsumer;
 import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponMessageQProducer;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
-class CouponApplyServiceTest extends IntegrationTestSupport {
+class CouponApplyServiceImplTest extends IntegrationTestSupport {
 
 	@Autowired
 	private UserRepository userRepository;
@@ -53,7 +53,7 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 	void setUp() {
 		messageQ = new MessageQ();
 		CouponMessageQProducer couponMessageQProducer = new CouponMessageQProducer(messageQ);
-		couponApplyService = new CouponApplyService(userRepository, couponRepository, couponMessageQProducer,
+		couponApplyService = new CouponApplyServiceImpl(userRepository, couponRepository, couponMessageQProducer,
 			couponTransactionHistoryRepository);
 	}
 
@@ -85,8 +85,14 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 		//given
 		int maxIssueCount = 1000;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
-		User user = createUser();
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
+
+		//1000명 유저 생성
+		Queue<Long> users = new ConcurrentLinkedDeque<>();
+		for (int i = 0; i < maxIssueCount; i++) {
+			User user = createUser();
+			users.add(user.getId());
+		}
 
 		//when
 		ExecutorService executorService = Executors.newFixedThreadPool(32);
@@ -95,7 +101,9 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}
@@ -200,6 +208,8 @@ class CouponApplyServiceTest extends IntegrationTestSupport {
 			executorService.submit(() -> {
 				try {
 					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), LocalDateTime.now());
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}

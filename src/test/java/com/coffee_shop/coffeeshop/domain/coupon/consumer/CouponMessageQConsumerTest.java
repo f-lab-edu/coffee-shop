@@ -18,14 +18,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.CouponApplyService;
+import com.coffee_shop.coffeeshop.service.coupon.applyservice.CouponApplyService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
 class CouponMessageQConsumerTest extends IntegrationTestSupport {
@@ -97,6 +97,8 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 			executorService.submit(() -> {
 				try {
 					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}
@@ -140,6 +142,8 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 				try {
 					couponApplyService.applyCoupon(createRequest(waitingQ.remove(), coupon.getId()),
 						LocalDateTime.now());
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}

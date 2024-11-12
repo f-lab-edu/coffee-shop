@@ -28,7 +28,7 @@ public class CouponMessageQConsumer implements CouponConsumer {
 			try {
 				couponIssueService.issueCoupon(couponApplication);
 			} catch (BusinessException e) {
-				log.info("쿠폰발급 실패 > " + e.getMessage());
+				log.info("쿠폰발급 실패 > {}", e.getMessage());
 			} catch (Exception e) {
 				couponIssueFailHandler.handleFail(couponApplication, e);
 			}

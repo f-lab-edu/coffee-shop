@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.service.coupon;
+package com.coffee_shop.coffeeshop.service.coupon.applyservice;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
@@ -21,12 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
+import com.coffee_shop.coffeeshop.service.coupon.CouponIssueFailHandler;
+import com.coffee_shop.coffeeshop.service.coupon.CouponIssueService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
@@ -148,6 +150,8 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			executorService.submit(() -> {
 				try {
 					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}
@@ -214,6 +218,8 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			executorService.submit(() -> {
 				try {
 					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					latch.countDown();
 				}

@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistoryRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.exception.ErrorCode;
@@ -31,7 +31,7 @@ public class CouponIssueService {
 		Coupon coupon = findCoupon(couponApplication.getCouponId());
 		User user = findUser(couponApplication.getUserId());
 
-		if (!coupon.canIssueCoupon()) {
+		if (!coupon.isCouponLimitExceeded()) {
 			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
 		}
 

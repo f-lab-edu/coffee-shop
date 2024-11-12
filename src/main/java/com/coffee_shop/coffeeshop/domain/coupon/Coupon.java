@@ -79,7 +79,7 @@ public class Coupon extends BaseTimeEntity {
 		return Cash.of(discountAmount);
 	}
 
-	public boolean canIssueCoupon() {
+	public boolean isCouponLimitExceeded() {
 		if (issuedCount < maxIssueCount) {
 			return true;
 		}

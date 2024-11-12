@@ -31,7 +31,7 @@ class CouponTest {
 		Coupon coupon = createCoupon(10, 9);
 
 		//when, then
-		assertTrue(coupon.canIssueCoupon());
+		assertTrue(coupon.isCouponLimitExceeded());
 	}
 
 	@DisplayName("발급된 쿠폰 개수가 최대 발급수보다 클 경우 발급이 불가능하다.")
@@ -41,7 +41,7 @@ class CouponTest {
 		Coupon coupon = createCoupon(10, 10);
 
 		//when, then
-		assertFalse(coupon.canIssueCoupon());
+		assertFalse(coupon.isCouponLimitExceeded());
 	}
 
 	@DisplayName("쿠폰이 발급되면 발급 개수를 +1 한다.")
