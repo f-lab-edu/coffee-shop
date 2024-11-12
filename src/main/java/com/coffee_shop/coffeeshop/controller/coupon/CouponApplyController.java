@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.coffee_shop.coffeeshop.common.dto.response.ApiResponse;
 import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponApplyRequest;
-import com.coffee_shop.coffeeshop.service.coupon.applyservice.CouponApplyService;
+import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 import lombok.RequiredArgsConstructor;

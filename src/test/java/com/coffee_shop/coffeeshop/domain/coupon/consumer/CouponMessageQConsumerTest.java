@@ -25,7 +25,7 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.applyservice.CouponApplyService;
+import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
 class CouponMessageQConsumerTest extends IntegrationTestSupport {

@@ -1,8 +1,9 @@
-package com.coffee_shop.coffeeshop.service.coupon.applyservice;
+package com.coffee_shop.coffeeshop.service.coupon.apply;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,8 @@ import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponProducer;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.AppliedUserRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueCountRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
@@ -21,16 +24,20 @@ import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyRespons
 
 import lombok.RequiredArgsConstructor;
 
+@Primary
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class CouponApplyServiceImpl implements CouponApplyService {
+public class RedisCouponApplyServiceImpl implements CouponApplyService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;
-	private final CouponProducer couponMessageQProducer;
+	private final CouponProducer redisCouponProducer;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
+	private final CouponIssueCountRepository couponIssueCountRepository;
+	private final AppliedUserRepository appliedUserRepository;
 
 	public CouponApplyResponse isCouponIssued(Long userId, Long couponId) {
+		//todo : 변환해야함
 		User user = findUser(userId);
 		Coupon coupon = findCoupon(couponId);
 
@@ -41,8 +48,8 @@ public class CouponApplyServiceImpl implements CouponApplyService {
 			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS);
 		}
 
-		int position = couponMessageQProducer.getPosition(userId, couponId);
-		if (couponMessageQProducer.isPositionNotFound(position)) {
+		int position = redisCouponProducer.getPosition(userId, couponId);
+		if (redisCouponProducer.isPositionNotFound(position)) {
 			return CouponApplyResponse.of(CouponIssueStatus.FAILURE);
 		}
 
@@ -55,21 +62,27 @@ public class CouponApplyServiceImpl implements CouponApplyService {
 		User user = findUser(request.getUserId());
 		Coupon coupon = findCoupon(request.getCouponId());
 
-		if (!coupon.isCouponLimitExceeded()) {
-			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
-		}
+		checkDuplicateIssuedCoupon(user);
 
-		checkDuplicateIssuedCoupon(coupon, user);
+		Long couponCount = couponIssueCountRepository.increment(coupon.getId());
+		isCouponLimitExceeded(coupon, couponCount);
 
-		couponMessageQProducer.applyCoupon(user, coupon, issueDateTime);
+		redisCouponProducer.applyCoupon(user, coupon, issueDateTime);
 	}
 
-	private void checkDuplicateIssuedCoupon(Coupon coupon, User user) {
-		couponTransactionHistoryRepository.findByCouponAndUser(coupon, user)
-			.ifPresent(couponTransactionHistory -> {
-				throw new BusinessException(ErrorCode.COUPON_DUPLICATE_ISSUE,
-					"사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
-			});
+	private void isCouponLimitExceeded(Coupon coupon, Long couponCount) {
+		if (couponCount > coupon.getMaxIssueCount()) {
+			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
+		}
+	}
+
+	private void checkDuplicateIssuedCoupon(User user) {
+		Boolean isIssuedCoupon = appliedUserRepository.isMember(user.getId());
+
+		if (isIssuedCoupon != null && isIssuedCoupon) {
+			throw new BusinessException(ErrorCode.COUPON_DUPLICATE_ISSUE,
+				"사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
+		}
 	}
 
 	private Coupon findCoupon(Long couponId) {
