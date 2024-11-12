@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
-import com.coffee_shop.coffeeshop.service.coupon.CouponIssueFailHandler;
-import com.coffee_shop.coffeeshop.service.coupon.CouponIssueService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
+import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssueFailHandler;
+import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssueService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
