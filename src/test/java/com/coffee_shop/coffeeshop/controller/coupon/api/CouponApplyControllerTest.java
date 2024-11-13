@@ -126,7 +126,7 @@ class CouponApplyControllerTest extends RestDocsSupport {
 			.userId(1L)
 			.build();
 
-		doNothing().when(couponApplyService).applyCoupon(any(), any());
+		doNothing().when(couponApplyService).applyCoupon(any());
 
 		//when //then
 		mockMvc.perform(

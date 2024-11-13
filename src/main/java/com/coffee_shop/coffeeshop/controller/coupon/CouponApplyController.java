@@ -1,7 +1,6 @@
 package com.coffee_shop.coffeeshop.controller.coupon;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 
 import jakarta.validation.Valid;
 
@@ -25,8 +24,8 @@ public class CouponApplyController {
 	private final CouponApplyService couponApplyService;
 
 	@PostMapping("/api/coupons/apply")
-	public ResponseEntity<ApiResponse<Void>> issueCoupon(@RequestBody @Valid CouponApplyRequest request) {
-		couponApplyService.applyCoupon(request.toServiceRequest(), LocalDateTime.now());
+	public ResponseEntity<ApiResponse<Void>> applyCoupon(@RequestBody @Valid CouponApplyRequest request) {
+		couponApplyService.applyCoupon(request.toServiceRequest());
 		return ResponseEntity.created(
 				URI.create("/api/users/" + request.getUserId() + "/coupons/" + request.getCouponId()))
 			.body(ApiResponse.created());

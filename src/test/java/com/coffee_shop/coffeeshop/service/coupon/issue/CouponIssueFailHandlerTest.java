@@ -83,7 +83,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		listAppender.start();
 
 		//when
-		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
+		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
 		Thread.sleep(1000);
@@ -136,7 +136,6 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(CouponApplication.builder()
 				.userId(exceptionUserId)
 				.couponId(coupon.getId())
-				.couponRequestDateTime(issueDateTime)
 				.failCount(i)
 				.build());
 		}
@@ -148,7 +147,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -204,7 +203,6 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(CouponApplication.builder()
 				.userId(exceptionUserId)
 				.couponId(coupon.getId())
-				.couponRequestDateTime(issueDateTime)
 				.failCount(i)
 				.build());
 		}
@@ -216,7 +214,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {

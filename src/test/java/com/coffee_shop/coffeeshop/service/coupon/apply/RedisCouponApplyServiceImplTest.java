@@ -77,7 +77,7 @@ class RedisCouponApplyServiceImplTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
+		redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
 		assertThat(couponIssueRepository.count()).isEqualTo(1);
@@ -105,8 +105,7 @@ class RedisCouponApplyServiceImplTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					redisCouponApplyServiceImpl.applyCoupon(createRequest(users.remove(), coupon.getId()),
-						issueDateTime);
+					redisCouponApplyServiceImpl.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -133,7 +132,7 @@ class RedisCouponApplyServiceImplTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime))
+			() -> redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId())))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("쿠폰이 모두 소진되어 발급할 수 없습니다.");
 	}
@@ -150,7 +149,7 @@ class RedisCouponApplyServiceImplTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime))
+			() -> redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId())))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
 	}

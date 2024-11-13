@@ -1,7 +1,5 @@
 package com.coffee_shop.coffeeshop.domain.coupon.producer;
 
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Component;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
@@ -19,7 +17,7 @@ public class RedisCouponProducer implements CouponProducer {
 	private final CouponIssueRepository couponIssueRepository;
 
 	@Override
-	public void applyCoupon(User user, Coupon coupon, LocalDateTime issueDateTime) {
+	public void applyCoupon(User user, Coupon coupon) {
 		long timestamp = System.currentTimeMillis();
 		couponIssueRepository.add(user, timestamp);
 	}

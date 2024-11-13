@@ -73,7 +73,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
+		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
 		assertThat(messageQ.size()).isEqualTo(1);
@@ -101,7 +101,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -127,7 +127,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime))
+			() -> couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId())))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("쿠폰이 모두 소진되어 발급할 수 없습니다.");
 	}
@@ -144,7 +144,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime))
+			() -> couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId())))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
 	}
@@ -207,7 +207,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), LocalDateTime.now());
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {

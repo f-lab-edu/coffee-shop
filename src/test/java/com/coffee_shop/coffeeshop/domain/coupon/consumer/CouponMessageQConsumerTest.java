@@ -60,7 +60,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
+		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
 		Thread.sleep(1000);
@@ -96,7 +96,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -140,8 +140,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(waitingQ.remove(), coupon.getId()),
-						LocalDateTime.now());
+					couponApplyService.applyCoupon(createRequest(waitingQ.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {

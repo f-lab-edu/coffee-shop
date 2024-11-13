@@ -1,6 +1,5 @@
 package com.coffee_shop.coffeeshop.service.coupon.apply;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.context.annotation.Primary;
@@ -58,7 +57,7 @@ public class RedisCouponApplyServiceImpl implements CouponApplyService {
 	}
 
 	@Transactional
-	public void applyCoupon(CouponApplyServiceRequest request, LocalDateTime issueDateTime) {
+	public void applyCoupon(CouponApplyServiceRequest request) {
 		User user = findUser(request.getUserId());
 		Coupon coupon = findCoupon(request.getCouponId());
 
@@ -67,7 +66,7 @@ public class RedisCouponApplyServiceImpl implements CouponApplyService {
 		Long couponCount = couponIssueCountRepository.increment(coupon.getId());
 		isCouponLimitExceeded(coupon, couponCount);
 
-		redisCouponProducer.applyCoupon(user, coupon, issueDateTime);
+		redisCouponProducer.applyCoupon(user, coupon);
 	}
 
 	private void isCouponLimitExceeded(Coupon coupon, Long couponCount) {

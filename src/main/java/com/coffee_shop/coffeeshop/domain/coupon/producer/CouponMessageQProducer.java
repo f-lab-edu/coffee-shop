@@ -1,6 +1,5 @@
 package com.coffee_shop.coffeeshop.domain.coupon.producer;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.springframework.stereotype.Component;
@@ -22,8 +21,8 @@ public class CouponMessageQProducer implements CouponProducer {
 	private final MessageQ messageQ;
 
 	@Override
-	public void applyCoupon(User user, Coupon coupon, LocalDateTime issueDateTime) {
-		CouponApplication couponApplication = CouponApplication.createCouponApplication(user, coupon, issueDateTime);
+	public void applyCoupon(User user, Coupon coupon) {
+		CouponApplication couponApplication = CouponApplication.createCouponApplication(user, coupon);
 		try {
 			messageQ.addMessage(couponApplication);
 		} catch (NullPointerException e) {
