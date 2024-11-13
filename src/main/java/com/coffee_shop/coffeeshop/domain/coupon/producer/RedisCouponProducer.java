@@ -21,7 +21,7 @@ public class RedisCouponProducer implements CouponProducer {
 	@Override
 	public void applyCoupon(User user, Coupon coupon, LocalDateTime issueDateTime) {
 		long timestamp = System.currentTimeMillis();
-		couponIssueRepository.add(coupon, user, timestamp);
+		couponIssueRepository.add(user, timestamp);
 	}
 
 	@Override

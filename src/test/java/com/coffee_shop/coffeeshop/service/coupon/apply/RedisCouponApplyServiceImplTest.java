@@ -80,7 +80,7 @@ class RedisCouponApplyServiceImplTest extends IntegrationTestSupport {
 		redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
 
 		//then
-		assertThat(couponIssueRepository.count(coupon)).isEqualTo(1);
+		assertThat(couponIssueRepository.count()).isEqualTo(1);
 	}
 
 	@DisplayName("쿠폰을 여러명이 발급 신청할경우 sorted set에 신청 개수만큼 쌓인다.")
@@ -118,7 +118,7 @@ class RedisCouponApplyServiceImplTest extends IntegrationTestSupport {
 		latch.await();
 
 		//then
-		assertThat(couponIssueRepository.count(coupon)).isEqualTo(maxIssueCount);
+		assertThat(couponIssueRepository.count()).isEqualTo(maxIssueCount);
 	}
 
 	@DisplayName("선착순 쿠폰 수량이 소진된 경우 쿠폰 발급 신청시 발급이 불가능하다.")
