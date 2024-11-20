@@ -22,7 +22,7 @@ public class CouponMessageQProducer implements CouponProducer {
 
 	@Override
 	public void applyCoupon(User user, Coupon coupon) {
-		CouponApplication couponApplication = CouponApplication.createCouponApplication(user, coupon);
+		CouponApplication couponApplication = CouponApplication.of(user, coupon);
 		try {
 			messageQ.addMessage(couponApplication);
 		} catch (NullPointerException e) {
