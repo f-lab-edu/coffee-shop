@@ -39,3 +39,6 @@ out/
 
 ### p6spy ###
 spy.log
+
+### querydsl ###
+src/main/generated
