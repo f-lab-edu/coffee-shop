@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.service.coupon.issue;
+package com.coffee_shop.coffeeshop.service.coupon.issue.fail;
 
 import java.util.List;
 
@@ -13,12 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class CouponIssueFailHandler {
+public class CouponIssueFailHandlerImpl implements CouponIssueFailHandler {
 	private static final int MAX_FAIL_COUNT = 3;
 	private final MessageQ messageQ;
 
-	public void handleFail(CouponApplication couponApplication, Exception e) {
-		couponApplication.addException(e);
+	public void handleFail(CouponApplication couponApplication, Exception exception) {
+		couponApplication.addException(exception);
 		couponApplication.increaseFailCount();
 
 		if (couponApplication.getFailCount() >= MAX_FAIL_COUNT) {

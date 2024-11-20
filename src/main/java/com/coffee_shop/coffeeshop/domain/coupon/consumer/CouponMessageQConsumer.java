@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
-import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssueFailHandler;
-import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssueService;
+import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssueServiceImpl;
+import com.coffee_shop.coffeeshop.service.coupon.issue.fail.CouponIssueFailHandlerImpl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class CouponMessageQConsumer implements CouponConsumer {
 	private final MessageQ messageQ;
-	private final CouponIssueFailHandler couponIssueFailHandler;
-	private final CouponIssueService couponIssueService;
+	private final CouponIssueFailHandlerImpl couponIssueFailHandler;
+	private final CouponIssueServiceImpl couponIssueService;
 
 	@Override
 	@Scheduled(cron = "0/1 * * * * *")
