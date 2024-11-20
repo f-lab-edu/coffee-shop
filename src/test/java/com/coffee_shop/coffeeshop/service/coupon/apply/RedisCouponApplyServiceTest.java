@@ -21,7 +21,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
-import com.coffee_shop.coffeeshop.domain.coupon.consumer.CouponConsumer;
+import com.coffee_shop.coffeeshop.domain.coupon.consumer.RedisCouponConsumer;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.AppliedUserRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueCountRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
@@ -32,7 +32,7 @@ import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
-class RedisCouponApplyServiceImplTest extends IntegrationTestSupport {
+class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private UserRepository userRepository;
 
@@ -58,7 +58,7 @@ class RedisCouponApplyServiceImplTest extends IntegrationTestSupport {
 	private CouponApplyService redisCouponApplyServiceImpl;
 
 	@MockBean
-	private CouponConsumer couponMessageQConsumer;
+	private RedisCouponConsumer redisCouponConsumer;
 
 	@AfterEach
 	void tearDown() {

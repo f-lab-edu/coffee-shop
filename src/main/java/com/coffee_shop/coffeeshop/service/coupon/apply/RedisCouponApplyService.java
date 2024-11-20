@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class RedisCouponApplyServiceImpl implements CouponApplyService {
+public class RedisCouponApplyService implements CouponApplyService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;
 	private final CouponProducer redisCouponProducer;
