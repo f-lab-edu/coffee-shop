@@ -17,6 +17,7 @@ import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 
 class CouponIssueRepositoryTest extends IntegrationTestSupport {
 	@Autowired
@@ -37,14 +38,18 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 	}
 
 	@Test
-	void add() {
+	void addUnique() {
 		Coupon coupon = createCoupon();
 		User user = createUser();
 
-		couponIssueRepository.add(coupon, user, 1731488205);
-		couponIssueRepository.add(coupon, user, 1731488206);
+		CouponApplication couponApplication1 = CouponApplication.of(user, coupon);
+		CouponApplication couponApplication2 = CouponApplication.of(user, coupon, 0);
+		CouponApplication couponApplication3 = CouponApplication.of(user, coupon, 1);
+		couponIssueRepository.add(couponApplication1, 1731488205);
+		couponIssueRepository.add(couponApplication2, 1731488206);
+		couponIssueRepository.add(couponApplication3, 1731488206);
 
-		Assertions.assertThat(couponIssueRepository.count()).isEqualTo(1L);
+		Assertions.assertThat(couponIssueRepository.count()).isEqualTo(2L);
 	}
 
 	@Test
@@ -53,10 +58,15 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 		User user1 = createUser();
 		User user2 = createUser();
 
-		couponIssueRepository.add(coupon, user1, 1731488205);
-		couponIssueRepository.add(coupon, user2, 1731488206);
+		couponIssueRepository.add(CouponApplication.of(user1, coupon), 1731488205);
+		couponIssueRepository.add(CouponApplication.of(user2, coupon), 1731488206);
 
 		Assertions.assertThat(couponIssueRepository.count()).isEqualTo(2L);
+	}
+
+	@Test
+	void countWhenKeyDoesNotExist() {
+		Assertions.assertThat(couponIssueRepository.count()).isEqualTo(0L);
 	}
 
 	@Test
@@ -66,7 +76,7 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 		Coupon coupon = createCoupon();
 		User user = createUser();
 
-		couponIssueRepository.add(coupon, user, 1731488205);
+		couponIssueRepository.add(CouponApplication.of(user, coupon), 1731488205);
 		assertFalse(couponIssueRepository.isEmpty());
 	}
 
@@ -77,9 +87,9 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 		User user2 = createUser();
 		User user3 = createUser();
 
-		couponIssueRepository.add(coupon, user1, 1731488205);
-		couponIssueRepository.add(coupon, user2, 1731488206);
-		couponIssueRepository.add(coupon, user3, 1731488206);
+		couponIssueRepository.add(CouponApplication.of(user1, coupon), 1731488205);
+		couponIssueRepository.add(CouponApplication.of(user2, coupon), 1731488206);
+		couponIssueRepository.add(CouponApplication.of(user3, coupon), 1731488206);
 
 		Set<Object> couponApplications = couponIssueRepository.range(1, 2);
 		assertThat(couponApplications)
