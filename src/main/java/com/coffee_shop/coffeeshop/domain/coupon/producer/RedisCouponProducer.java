@@ -1,14 +1,17 @@
 package com.coffee_shop.coffeeshop.domain.coupon.producer;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@Primary
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -19,7 +22,7 @@ public class RedisCouponProducer implements CouponProducer {
 	@Override
 	public void applyCoupon(User user, Coupon coupon) {
 		long timestamp = System.currentTimeMillis();
-		couponIssueRepository.add(coupon, user, timestamp);
+		couponIssueRepository.add(CouponApplication.of(user, coupon), timestamp);
 	}
 
 	@Override
