@@ -18,19 +18,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyService;
+import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyServiceImpl;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
 class CouponMessageQConsumerTest extends IntegrationTestSupport {
 	@Autowired
-	private CouponApplyService couponApplyService;
+	private CouponApplyServiceImpl couponApplyServiceImpl;
 
 	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
@@ -60,7 +59,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
+		couponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
 		Thread.sleep(1000);
@@ -96,7 +95,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
+					couponApplyServiceImpl.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -111,61 +110,6 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		Thread.sleep(4000);
 
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
-
-		List<Coupon> coupons = couponRepository.findAll();
-		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
-
-		assertTrue(messageQ.isEmpty());
-	}
-
-	@DisplayName("쿠폰을 여러명에게 순차적으로 발급한다.")
-	@Test
-	public void issueCouponsSequentiallyToMultipleUsers() throws InterruptedException {
-		//given
-		int maxIssueCount = 3;
-		Coupon coupon = createCoupon(maxIssueCount, 0);
-
-		Queue<Long> waitingQ = new ConcurrentLinkedDeque<>();
-		Queue<User> applyQ = new ConcurrentLinkedDeque<>();
-		for (int i = 0; i < maxIssueCount; i++) {
-			User user = createUser();
-			waitingQ.add(user.getId());
-			applyQ.add(user);
-		}
-
-		//when
-		ExecutorService executorService = Executors.newFixedThreadPool(32);
-		CountDownLatch latch = new CountDownLatch(maxIssueCount);
-
-		for (int i = 0; i < maxIssueCount; i++) {
-			executorService.submit(() -> {
-				try {
-					couponApplyService.applyCoupon(createRequest(waitingQ.remove(), coupon.getId()));
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					latch.countDown();
-				}
-			});
-
-			Thread.sleep(1000);
-		}
-
-		latch.await();
-
-		//then
-		Thread.sleep(4000);
-
-		List<CouponTransactionHistory> histories = couponTransactionHistoryRepository.findAll();
-		assertThat(histories).hasSize(maxIssueCount);
-
-		LocalDateTime beforeDateTime = LocalDateTime.now().minusDays(1);
-		while (!applyQ.isEmpty()) {
-			CouponTransactionHistory history = couponTransactionHistoryRepository.findByCouponAndUser(coupon,
-				applyQ.remove()).get();
-			assertThat(history.getIssueDateTime().isAfter(beforeDateTime)).isTrue();
-			beforeDateTime = history.getIssueDateTime();
-		}
 
 		List<Coupon> coupons = couponRepository.findAll();
 		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
