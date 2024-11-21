@@ -3,6 +3,7 @@ package com.coffee_shop.coffeeshop.domain.coupon.repository;
 import java.util.Set;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
@@ -31,15 +32,9 @@ public class CouponIssueRepository {
 		return count() == 0L;
 	}
 
-	public Set<Object> range(long start, long end) {
+	public Set<ZSetOperations.TypedTuple<Object>> popMin(long count) {
 		return redisTemplate
 			.opsForZSet()
-			.range(COUPON_QUEUE_KEY_PREFIX, start, end);
-	}
-
-	public void remove(CouponApplication couponApplication) {
-		redisTemplate
-			.opsForZSet()
-			.remove(COUPON_QUEUE_KEY_PREFIX, couponApplication);
+			.popMin(COUPON_QUEUE_KEY_PREFIX, count);
 	}
 }

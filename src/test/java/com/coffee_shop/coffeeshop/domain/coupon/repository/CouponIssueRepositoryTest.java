@@ -4,7 +4,6 @@ import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.user.User;
@@ -81,7 +81,7 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 	}
 
 	@Test
-	void range() {
+	void popMin() {
 		Coupon coupon = createCoupon();
 		User user1 = createUser();
 		User user2 = createUser();
@@ -89,14 +89,15 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 
 		couponIssueRepository.add(CouponApplication.of(user1, coupon), 1731488205);
 		couponIssueRepository.add(CouponApplication.of(user2, coupon), 1731488206);
-		couponIssueRepository.add(CouponApplication.of(user3, coupon), 1731488206);
+		couponIssueRepository.add(CouponApplication.of(user3, coupon), 1731488204);
 
-		Set<Object> couponApplications = couponIssueRepository.range(1, 2);
-		assertThat(couponApplications)
-			.extracting("userId", "couponId", "failCount", "exceptionList")
+		Set<ZSetOperations.TypedTuple<Object>> popped = couponIssueRepository.popMin(10);
+		assertThat(popped)
+			.extracting("value")
 			.containsExactly(
-				tuple(user2.getId(), coupon.getId(), 0, List.of()),
-				tuple(user3.getId(), coupon.getId(), 0, List.of())
+				CouponApplication.of(user3, coupon, 0),
+				CouponApplication.of(user1, coupon, 0),
+				CouponApplication.of(user2, coupon, 0)
 			);
 	}
 
