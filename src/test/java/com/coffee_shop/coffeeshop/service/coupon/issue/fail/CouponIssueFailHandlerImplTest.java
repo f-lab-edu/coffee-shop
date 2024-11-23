@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.service.coupon.applyservice;
+package com.coffee_shop.coffeeshop.service.coupon.issue.fail;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
@@ -27,16 +27,16 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.CouponIssueFailHandler;
-import com.coffee_shop.coffeeshop.service.coupon.CouponIssueService;
+import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
+import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssueServiceImpl;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 
-class CouponIssueFailHandlerTest extends IntegrationTestSupport {
+class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 	@Autowired
 	private UserRepository userRepository;
 
@@ -44,7 +44,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 	private CouponRepository couponRepository;
 
 	@Autowired
-	private CouponIssueFailHandler couponIssueFailHandler;
+	private CouponIssueFailHandlerImpl couponIssueFailHandlerImpl;
 
 	@Autowired
 	private CouponApplyService couponApplyService;
@@ -56,7 +56,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
 	@SpyBean
-	private CouponIssueService couponIssueService;
+	private CouponIssueServiceImpl couponIssueService;
 
 	private Long exceptionUserId;
 
@@ -79,12 +79,12 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(any(CouponApplication.class));
 
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-		Logger logger = (Logger)LoggerFactory.getLogger(CouponIssueFailHandler.class);
+		Logger logger = (Logger)LoggerFactory.getLogger(CouponIssueFailHandlerImpl.class);
 		logger.addAppender(listAppender);
 		listAppender.start();
 
 		//when
-		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()), issueDateTime);
+		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
 		Thread.sleep(1000);
@@ -119,7 +119,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 
 		//log 체크
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-		Logger logger = (Logger)LoggerFactory.getLogger(CouponIssueFailHandler.class);
+		Logger logger = (Logger)LoggerFactory.getLogger(CouponIssueFailHandlerImpl.class);
 		logger.addAppender(listAppender);
 		listAppender.start();
 
@@ -137,7 +137,6 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(CouponApplication.builder()
 				.userId(exceptionUserId)
 				.couponId(coupon.getId())
-				.couponRequestDateTime(issueDateTime)
 				.failCount(i)
 				.build());
 		}
@@ -149,7 +148,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -187,7 +186,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 
 		//log 체크
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-		Logger logger = (Logger)LoggerFactory.getLogger(CouponIssueFailHandler.class);
+		Logger logger = (Logger)LoggerFactory.getLogger(CouponIssueFailHandlerImpl.class);
 		logger.addAppender(listAppender);
 		listAppender.start();
 
@@ -205,7 +204,6 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 			doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(CouponApplication.builder()
 				.userId(exceptionUserId)
 				.couponId(coupon.getId())
-				.couponRequestDateTime(issueDateTime)
 				.failCount(i)
 				.build());
 		}
@@ -217,7 +215,7 @@ class CouponIssueFailHandlerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()), issueDateTime);
+					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {

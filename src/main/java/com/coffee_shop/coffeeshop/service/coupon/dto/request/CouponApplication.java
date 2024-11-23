@@ -1,6 +1,5 @@
 package com.coffee_shop.coffeeshop.service.coupon.dto.request;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -20,26 +19,29 @@ public class CouponApplication {
 
 	private Long couponId;
 
-	private LocalDateTime couponRequestDateTime;
-
 	private int failCount;
 
 	private List<Exception> exceptionList = new ArrayList<>();
 
 	@Builder
-	private CouponApplication(Long userId, Long couponId, LocalDateTime couponRequestDateTime, int failCount) {
+	private CouponApplication(Long userId, Long couponId, int failCount) {
 		this.userId = userId;
 		this.couponId = couponId;
-		this.couponRequestDateTime = couponRequestDateTime;
 		this.failCount = failCount;
 	}
 
-	public static CouponApplication createCouponApplication(User user, Coupon coupon,
-		LocalDateTime couponRequestDateTime) {
+	public static CouponApplication of(User user, Coupon coupon) {
 		return CouponApplication.builder()
 			.userId(user.getId())
 			.couponId(coupon.getId())
-			.couponRequestDateTime(couponRequestDateTime)
+			.build();
+	}
+
+	public static CouponApplication of(User user, Coupon coupon, int failCount) {
+		return CouponApplication.builder()
+			.userId(user.getId())
+			.couponId(coupon.getId())
+			.failCount(failCount)
 			.build();
 	}
 
@@ -59,13 +61,12 @@ public class CouponApplication {
 			return false;
 		CouponApplication that = (CouponApplication)o;
 		return getFailCount() == that.getFailCount() && Objects.equals(getUserId(), that.getUserId())
-			&& Objects.equals(getCouponId(), that.getCouponId()) && Objects.equals(getCouponRequestDateTime(),
-			that.getCouponRequestDateTime());
+			&& Objects.equals(getCouponId(), that.getCouponId());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getUserId(), getCouponId(), getCouponRequestDateTime(), getFailCount());
+		return Objects.hash(getUserId(), getCouponId(), getFailCount());
 	}
 
 	@Override
@@ -73,7 +74,6 @@ public class CouponApplication {
 		return "CouponApplication{" +
 			"userId=" + userId +
 			", couponId=" + couponId +
-			", issueDateTime=" + couponRequestDateTime +
 			", failCount=" + failCount +
 			", exceptionList=" + exceptionList +
 			'}';

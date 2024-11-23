@@ -1,7 +1,6 @@
 package com.coffee_shop.coffeeshop.controller.coupon;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 
 import jakarta.validation.Valid;
 
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.coffee_shop.coffeeshop.common.dto.response.ApiResponse;
 import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponApplyRequest;
-import com.coffee_shop.coffeeshop.service.coupon.applyservice.CouponApplyService;
+import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -25,8 +24,8 @@ public class CouponApplyController {
 	private final CouponApplyService couponApplyService;
 
 	@PostMapping("/api/coupons/apply")
-	public ResponseEntity<ApiResponse<Void>> issueCoupon(@RequestBody @Valid CouponApplyRequest request) {
-		couponApplyService.applyCoupon(request.toServiceRequest(), LocalDateTime.now());
+	public ResponseEntity<ApiResponse<Void>> applyCoupon(@RequestBody @Valid CouponApplyRequest request) {
+		couponApplyService.applyCoupon(request.toServiceRequest());
 		return ResponseEntity.created(
 				URI.create("/api/users/" + request.getUserId() + "/coupons/" + request.getCouponId()))
 			.body(ApiResponse.created());

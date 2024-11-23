@@ -1,4 +1,4 @@
-package com.coffee_shop.coffeeshop.service.coupon;
+package com.coffee_shop.coffeeshop.service.coupon.issue;
 
 import java.time.LocalDateTime;
 
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class CouponIssueService {
+public class CouponIssueServiceImpl implements CouponIssueService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;

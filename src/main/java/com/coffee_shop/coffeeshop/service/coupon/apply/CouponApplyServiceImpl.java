@@ -1,6 +1,5 @@
-package com.coffee_shop.coffeeshop.service.coupon.applyservice;
+package com.coffee_shop.coffeeshop.service.coupon.apply;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -51,7 +50,7 @@ public class CouponApplyServiceImpl implements CouponApplyService {
 	}
 
 	@Transactional
-	public void applyCoupon(CouponApplyServiceRequest request, LocalDateTime issueDateTime) {
+	public void applyCoupon(CouponApplyServiceRequest request) {
 		User user = findUser(request.getUserId());
 		Coupon coupon = findCoupon(request.getCouponId());
 
@@ -61,7 +60,7 @@ public class CouponApplyServiceImpl implements CouponApplyService {
 
 		checkDuplicateIssuedCoupon(coupon, user);
 
-		couponMessageQProducer.applyCoupon(user, coupon, issueDateTime);
+		couponMessageQProducer.applyCoupon(user, coupon);
 	}
 
 	private void checkDuplicateIssuedCoupon(Coupon coupon, User user) {
