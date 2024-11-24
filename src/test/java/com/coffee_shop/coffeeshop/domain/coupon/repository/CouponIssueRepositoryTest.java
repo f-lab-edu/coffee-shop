@@ -30,7 +30,7 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 	private CouponIssueRepository couponIssueRepository;
 
 	@Autowired
-	private RedisTemplate<String, Object> redisTemplate;
+	private RedisTemplate<String, Object> redisTemplateJson;
 
 	@AfterEach
 	void tearDown() {
@@ -102,9 +102,9 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 	}
 
 	private void clearAll() {
-		Set<String> keys = redisTemplate.keys("*");
+		Set<String> keys = redisTemplateJson.keys("*");
 		if (keys != null && !keys.isEmpty()) {
-			redisTemplate.delete(keys);
+			redisTemplateJson.delete(keys);
 		}
 	}
 

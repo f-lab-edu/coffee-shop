@@ -14,16 +14,16 @@ import lombok.RequiredArgsConstructor;
 @Repository
 public class CouponIssueRepository {
 	private static final String COUPON_QUEUE_KEY_PREFIX = "coupon_issue_queue";
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, Object> redisTemplateJson;
 
 	public void add(CouponApplication application, long timestamp) {
-		redisTemplate
+		redisTemplateJson
 			.opsForZSet()
 			.add(COUPON_QUEUE_KEY_PREFIX, application, timestamp);
 	}
 
 	public Long count() {
-		return redisTemplate
+		return redisTemplateJson
 			.opsForZSet()
 			.zCard(COUPON_QUEUE_KEY_PREFIX);
 	}
@@ -33,7 +33,7 @@ public class CouponIssueRepository {
 	}
 
 	public Set<ZSetOperations.TypedTuple<Object>> popMin(long count) {
-		return redisTemplate
+		return redisTemplateJson
 			.opsForZSet()
 			.popMin(COUPON_QUEUE_KEY_PREFIX, count);
 	}
