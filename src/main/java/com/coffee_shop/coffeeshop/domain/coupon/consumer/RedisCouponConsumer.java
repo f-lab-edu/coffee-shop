@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssuanceRateRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import com.coffee_shop.coffeeshop.service.coupon.issue.RedisCouponIssueService;
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Component
 public class RedisCouponConsumer implements CouponConsumer {
-	private static final long RANGE_COUNT = 10L;
+	private final CouponIssuanceRateRepository couponIssuanceRateRepository;
 	private final CouponIssueRepository couponIssueRepository;
 	private final RedisCouponIssueFailHandler redisCouponIssueFailHandler;
 	private final RedisCouponIssueService redisCouponIssueService;
@@ -32,7 +33,8 @@ public class RedisCouponConsumer implements CouponConsumer {
 			return;
 		}
 
-		Set<ZSetOperations.TypedTuple<Object>> popped = couponIssueRepository.popMin(RANGE_COUNT);
+		long rangeCount = couponIssuanceRateRepository.getRangeCount();
+		Set<ZSetOperations.TypedTuple<Object>> popped = couponIssueRepository.popMin(rangeCount);
 		for (ZSetOperations.TypedTuple<Object> typedTuple : popped) {
 			Object object = typedTuple.getValue();
 			if (!(object instanceof CouponApplication)) {
