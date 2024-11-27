@@ -63,14 +63,14 @@ public class RedisCouponApplyService implements CouponApplyService {
 
 		checkDuplicateIssuedCoupon(user);
 
-		Long couponCount = couponIssueCountRepository.increment(coupon.getId());
-		isCouponLimitExceeded(coupon, couponCount);
+		Long issueCount = couponIssueCountRepository.getIssueCount(coupon.getId());
+		isCouponLimitExceeded(coupon, issueCount);
 
 		redisCouponProducer.applyCoupon(user, coupon);
 	}
 
-	private void isCouponLimitExceeded(Coupon coupon, Long couponCount) {
-		if (couponCount > coupon.getMaxIssueCount()) {
+	private void isCouponLimitExceeded(Coupon coupon, Long issueCount) {
+		if (issueCount + 1 > coupon.getMaxIssueCount()) {
 			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
 		}
 	}

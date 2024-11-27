@@ -90,4 +90,8 @@ public class Coupon extends BaseTimeEntity {
 	public void issueCoupon() {
 		issuedCount += 1;
 	}
+
+	public void updateIssuedCount(Long issuedCount) {
+		this.issuedCount = issuedCount.intValue();
+	}
 }
