@@ -4,6 +4,7 @@ import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -14,23 +15,28 @@ import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueCountRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.apply.RedisCouponApplyService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 class RedisCouponConsumerTest extends IntegrationTestSupport {
 	@Autowired
-	private RedisCouponApplyService redisCouponApplyService;
+	private CouponIssueCountRepository couponIssueCountRepository;
 
 	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
@@ -55,6 +61,34 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		clearAll();
 	}
 
+	@DisplayName("쿠폰 최대 발급 개수를 초과해서 발급할 수 없다.")
+	@Test
+	void issueCouponWhenMaxCouponIssueCountExceeded() throws InterruptedException {
+		//given
+		Coupon coupon = createCoupon(1, 0);
+		User user1 = createUser();
+		User user2 = createUser();
+
+		couponIssueRepository.add(CouponApplication.of(user1, coupon), 1731488205);
+		couponIssueRepository.add(CouponApplication.of(user2, coupon), 1731488206);
+
+		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+		Logger logger = (Logger)LoggerFactory.getLogger(RedisCouponConsumer.class);
+		logger.addAppender(listAppender);
+		listAppender.start();
+
+		//then
+		Thread.sleep(4000);
+		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(1);
+		assertTrue(couponIssueRepository.isEmpty());
+		assertThat(couponIssueCountRepository.getIssueCount(coupon.getId())).isEqualTo(1);
+
+		List<ILoggingEvent> testLogs = listAppender.list;
+		assertThat(testLogs.size()).isEqualTo(1);
+		assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
+			"쿠폰발급 실패 > 쿠폰이 모두 소진되어 발급할 수 없습니다.");
+	}
+
 	@DisplayName("한명의 고객에게 쿠폰을 발급한다.")
 	@Test
 	void issueCoupon() throws InterruptedException {
@@ -66,10 +100,11 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		couponIssueRepository.add(CouponApplication.of(user, coupon), 1731488205);
 
 		//then
-		Thread.sleep(1000);
+		Thread.sleep(2000);
 
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(1);
 		assertTrue(couponIssueRepository.isEmpty());
+		assertThat(couponIssueCountRepository.getIssueCount(coupon.getId())).isEqualTo(1);
 	}
 
 	@DisplayName("쿠폰을 여러명에게 발급한다.")
@@ -105,10 +140,11 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		latch.await();
 
 		//then
-		Thread.sleep(1000);
+		Thread.sleep(4000);
 
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
 		assertTrue(couponIssueRepository.isEmpty());
+		assertThat(couponIssueCountRepository.getIssueCount(coupon.getId())).isEqualTo(maxIssueCount);
 	}
 
 	@DisplayName("쿠폰을 여러명에게 순차적으로 발급한다.")
@@ -130,7 +166,7 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		couponIssueRepository.add(couponApplication3, 1731488207);
 
 		//then
-		Thread.sleep(3000);
+		Thread.sleep(4000);
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(3);
 		CouponTransactionHistory couponTransactionHistory1 = couponTransactionHistoryRepository.findByCouponAndUser(
 			coupon, user1).get();
@@ -142,6 +178,7 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		assertThat(couponTransactionHistory2.getIssueDateTime()).isAfter(couponTransactionHistory1.getIssueDateTime());
 		assertThat(couponTransactionHistory3.getIssueDateTime()).isAfter(couponTransactionHistory2.getIssueDateTime());
 		assertTrue(couponIssueRepository.isEmpty());
+		assertThat(couponIssueCountRepository.getIssueCount(coupon.getId())).isEqualTo(3);
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {
