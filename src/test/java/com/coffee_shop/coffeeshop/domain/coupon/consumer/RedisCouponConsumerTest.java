@@ -3,6 +3,7 @@ package com.coffee_shop.coffeeshop.domain.coupon.consumer;
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Queue;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
@@ -28,6 +30,7 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
+import com.coffee_shop.coffeeshop.service.coupon.CouponService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 
 import ch.qos.logback.classic.Logger;
@@ -49,6 +52,9 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 
 	@Autowired
 	private CouponIssueRepository couponIssueRepository;
+
+	@SpyBean
+	private CouponService couponService;
 
 	@Autowired
 	private RedisTemplate<String, Long> redisTemplate;
@@ -179,6 +185,134 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		assertThat(couponTransactionHistory3.getIssueDateTime()).isAfter(couponTransactionHistory2.getIssueDateTime());
 		assertTrue(couponIssueRepository.isEmpty());
 		assertThat(couponIssueCountRepository.getIssueCount(coupon.getId())).isEqualTo(3);
+	}
+
+	@DisplayName("쿠폰개수를 동기화한다.")
+	@Test
+	public void shouldSyncCouponCount() throws InterruptedException {
+		//given
+		int maxIssueCount = 19;
+		Coupon coupon = createCoupon(maxIssueCount, 0);
+
+		//20명 유저 생성
+		Queue<User> users = new ConcurrentLinkedDeque<>();
+		for (int i = 0; i < maxIssueCount; i++) {
+			User user = createUser();
+			users.add(user);
+		}
+
+		//when
+		ExecutorService executorService = Executors.newFixedThreadPool(32);
+		CountDownLatch latch = new CountDownLatch(maxIssueCount);
+
+		for (int i = 0; i < maxIssueCount; i++) {
+			executorService.submit(() -> {
+				try {
+					couponIssueRepository.add(CouponApplication.of(users.remove(), coupon), 1731488205);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+
+		//then
+		Thread.sleep(2000);
+
+		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
+		assertTrue(couponIssueRepository.isEmpty());
+		assertThat(couponIssueCountRepository.getIssueCount(coupon.getId())).isEqualTo(maxIssueCount);
+		assertThat(couponRepository.findById(coupon.getId()).get().getIssuedCount()).isEqualTo(maxIssueCount);
+	}
+
+	@DisplayName("쿠폰개수를 10단위로 동기화한다.")
+	@Test
+	public void syncCouponCountInTens() throws InterruptedException {
+		//given
+		int syncCount = 10;
+		int maxIssueCount = 20;
+		int issueCount = 19;
+		Coupon coupon = createCoupon(maxIssueCount, 0);
+
+		//20명 유저 생성
+		Queue<User> users = new ConcurrentLinkedDeque<>();
+		for (int i = 0; i < issueCount; i++) {
+			User user = createUser();
+			users.add(user);
+		}
+
+		//when
+		ExecutorService executorService = Executors.newFixedThreadPool(32);
+		CountDownLatch latch = new CountDownLatch(issueCount);
+
+		for (int i = 0; i < issueCount; i++) {
+			executorService.submit(() -> {
+				try {
+					couponIssueRepository.add(CouponApplication.of(users.remove(), coupon), 1731488205);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+
+		//then
+		Thread.sleep(2000);
+
+		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(issueCount);
+		assertTrue(couponIssueRepository.isEmpty());
+		assertThat(couponIssueCountRepository.getIssueCount(coupon.getId())).isEqualTo(issueCount);
+		assertThat(couponRepository.findById(coupon.getId()).get().getIssuedCount()).isEqualTo(
+			issueCount / syncCount * syncCount);
+	}
+
+	@DisplayName("쿠폰 동기화 중 예외 발생시 쿠폰 발급은 정상처리된다.")
+	@Test
+	public void issueCouponsSuccessfullyWhenSyncFails() throws InterruptedException {
+		//given
+		int maxIssueCount = 10;
+		Coupon coupon = createCoupon(maxIssueCount, 0);
+
+		//20명 유저 생성
+		Queue<User> users = new ConcurrentLinkedDeque<>();
+		for (int i = 0; i < maxIssueCount; i++) {
+			User user = createUser();
+			users.add(user);
+		}
+
+		doThrow(new RuntimeException()).when(couponService).syncCouponIssuedCount(coupon.getId(), (long)maxIssueCount);
+
+		//when
+		ExecutorService executorService = Executors.newFixedThreadPool(32);
+		CountDownLatch latch = new CountDownLatch(maxIssueCount);
+
+		for (int i = 0; i < maxIssueCount; i++) {
+			executorService.submit(() -> {
+				try {
+					couponIssueRepository.add(CouponApplication.of(users.remove(), coupon), 1731488205);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+
+		//then
+		Thread.sleep(2000);
+
+		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
+		assertTrue(couponIssueRepository.isEmpty());
+		assertThat(couponIssueCountRepository.getIssueCount(coupon.getId())).isEqualTo(maxIssueCount);
+		assertThat(couponRepository.findById(coupon.getId()).get().getIssuedCount()).isEqualTo(0);
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {
