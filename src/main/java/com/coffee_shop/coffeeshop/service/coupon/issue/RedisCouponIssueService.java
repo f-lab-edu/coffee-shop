@@ -14,13 +14,18 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.exception.ErrorCode;
+import com.coffee_shop.coffeeshop.service.coupon.CouponService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class RedisCouponIssueService implements CouponIssueService {
+	private static final int SYNC_COUNT = 10;
+	private final CouponService couponService;
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
@@ -37,7 +42,16 @@ public class RedisCouponIssueService implements CouponIssueService {
 		couponTransactionHistoryRepository.save(
 			CouponTransactionHistory.issueCoupon(user, coupon, LocalDateTime.now()));
 
-		couponIssueCountRepository.increment(coupon.getId());
+		Long increment = couponIssueCountRepository.increment(coupon.getId());
+		if (isDbSyncRequired(increment, coupon)) {
+			try {
+				couponService.syncCouponIssuedCount(coupon.getId(), increment);
+			} catch (BusinessException e) {
+				log.warn("Failed to synchronize coupon issuance count with the database. {}", e.getMessage());
+			} catch (Exception e) {
+				log.error("Failed to synchronize coupon issuance count with the database.", e);
+			}
+		}
 	}
 
 	private Coupon findCoupon(Long couponId) {
@@ -55,5 +69,14 @@ public class RedisCouponIssueService implements CouponIssueService {
 		if (issueCount + 1 > coupon.getMaxIssueCount()) {
 			throw new BusinessException(ErrorCode.COUPON_LIMIT_REACHED);
 		}
+	}
+
+	private static boolean isDbSyncRequired(Long increment, Coupon coupon) {
+		if (increment == null || increment <= 0L) {
+			log.warn("Coupon could not be updated because issuedCount is null or zero");
+			return false;
+		}
+
+		return increment % SYNC_COUNT == 0 || increment == coupon.getMaxIssueCount();
 	}
 }
