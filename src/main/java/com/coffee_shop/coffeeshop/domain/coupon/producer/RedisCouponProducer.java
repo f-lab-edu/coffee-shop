@@ -26,7 +26,7 @@ public class RedisCouponProducer implements CouponProducer {
 	}
 
 	@Override
-	public int getPosition(Long userId, Long couponId) {
+	public int getPosition(User user, Coupon coupon) {
 		return POSITION_NOT_FOUND;
 	}
 

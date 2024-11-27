@@ -40,7 +40,7 @@ public class CouponApplyServiceImpl implements CouponApplyService {
 			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS);
 		}
 
-		int position = couponMessageQProducer.getPosition(userId, couponId);
+		int position = couponMessageQProducer.getPosition(user, coupon);
 		if (couponMessageQProducer.isPositionNotFound(position)) {
 			return CouponApplyResponse.of(CouponIssueStatus.FAILURE);
 		}

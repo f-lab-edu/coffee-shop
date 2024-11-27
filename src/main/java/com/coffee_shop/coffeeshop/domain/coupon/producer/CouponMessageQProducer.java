@@ -33,13 +33,13 @@ public class CouponMessageQProducer implements CouponProducer {
 	}
 
 	@Override
-	public int getPosition(Long userId, Long couponId) {
+	public int getPosition(User user, Coupon coupon) {
 		ArrayList<CouponApplication> couponApplications = messageQ.toArrayList();
 		int qSize = couponApplications.size();
 
 		for (int i = 0; i < qSize; i++) {
 			CouponApplication application = couponApplications.get(i);
-			if (isMatchingApplication(userId, couponId, application)) {
+			if (isMatchingApplication(user.getId(), coupon.getId(), application)) {
 				return i + 1;
 			}
 		}

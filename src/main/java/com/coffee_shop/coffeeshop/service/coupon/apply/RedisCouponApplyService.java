@@ -47,7 +47,7 @@ public class RedisCouponApplyService implements CouponApplyService {
 			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS);
 		}
 
-		int position = redisCouponProducer.getPosition(userId, couponId);
+		int position = redisCouponProducer.getPosition(user, coupon);
 		if (redisCouponProducer.isPositionNotFound(position)) {
 			return CouponApplyResponse.of(CouponIssueStatus.FAILURE);
 		}
