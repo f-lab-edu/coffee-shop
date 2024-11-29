@@ -21,7 +21,8 @@ public enum ErrorCode {
 	INVALID_DISCOUNT_PERCENTAGE(HttpStatus.BAD_REQUEST, "INVALID_DISCOUNT_PERCENTAGE", "할인율은 1~100까지 입력가능합니다."),
 	COUPON_LIMIT_REACHED(HttpStatus.BAD_REQUEST, "COUPON_LIMIT_REACHED", "쿠폰이 모두 소진되어 발급할 수 없습니다."),
 	COUPON_DUPLICATE_ISSUE(HttpStatus.BAD_REQUEST, "COUPON_DUPLICATE_ISSUE", "이미 발급된 쿠폰입니다."),
-	OVER_MAX_ORDER_COUNT(HttpStatus.BAD_REQUEST, "OVER_MAX_ORDER_COUNT", "최대 주문 가능 수량은 20개 입니다.");
+	OVER_MAX_ORDER_COUNT(HttpStatus.BAD_REQUEST, "OVER_MAX_ORDER_COUNT", "최대 주문 가능 수량은 20개 입니다."),
+	POSITION_NOT_FOUND(HttpStatus.NOT_FOUND, "POSITION_NOT_FOUND", "대기 순번을 찾을 수 없습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;

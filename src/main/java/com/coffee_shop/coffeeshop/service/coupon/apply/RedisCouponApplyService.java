@@ -36,7 +36,6 @@ public class RedisCouponApplyService implements CouponApplyService {
 	private final AppliedUserRepository appliedUserRepository;
 
 	public CouponApplyResponse isCouponIssued(Long userId, Long couponId) {
-		//todo : 변환해야함
 		User user = findUser(userId);
 		Coupon coupon = findCoupon(couponId);
 
@@ -47,13 +46,12 @@ public class RedisCouponApplyService implements CouponApplyService {
 			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS);
 		}
 
-		int position = redisCouponProducer.getPosition(user, coupon);
-		if (redisCouponProducer.isPositionNotFound(position)) {
+		try {
+			int position = redisCouponProducer.getPosition(user, coupon);
+			return CouponApplyResponse.of(CouponIssueStatus.IN_PROGRESS, position);
+		} catch (BusinessException e) {
 			return CouponApplyResponse.of(CouponIssueStatus.FAILURE);
 		}
-
-		return CouponApplyResponse.of(CouponIssueStatus.IN_PROGRESS, position);
-
 	}
 
 	@Transactional
