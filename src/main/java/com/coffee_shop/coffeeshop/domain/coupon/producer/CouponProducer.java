@@ -7,6 +7,4 @@ public interface CouponProducer {
 	void applyCoupon(User user, Coupon coupon);
 
 	int getPosition(User user, Coupon coupon);
-
-	boolean isPositionNotFound(int position);
 }

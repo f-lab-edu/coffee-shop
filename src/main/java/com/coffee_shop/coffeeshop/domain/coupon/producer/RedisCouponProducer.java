@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Component
 public class RedisCouponProducer implements CouponProducer {
-	private static final int POSITION_NOT_FOUND = -1;
 	private final CouponIssueRepository couponIssueRepository;
 
 	@Override
@@ -35,10 +34,5 @@ public class RedisCouponProducer implements CouponProducer {
 		}
 
 		return position.intValue() + 1;
-	}
-
-	@Override
-	public boolean isPositionNotFound(int position) {
-		return position == POSITION_NOT_FOUND;
 	}
 }
