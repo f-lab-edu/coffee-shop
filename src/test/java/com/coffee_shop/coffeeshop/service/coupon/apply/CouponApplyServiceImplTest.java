@@ -22,7 +22,7 @@ import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
-import com.coffee_shop.coffeeshop.domain.coupon.consumer.CouponConsumer;
+import com.coffee_shop.coffeeshop.domain.coupon.consumer.CouponMessageQConsumer;
 import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponMessageQProducer;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
@@ -44,7 +44,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
 	@MockBean
-	private CouponConsumer couponMessageQConsumer;
+	private CouponMessageQConsumer couponMessageQConsumer;
 
 	private CouponApplyService couponApplyService;
 	private MessageQ messageQ;
@@ -151,7 +151,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 
 	@DisplayName("쿠폰 발급이 완료된다면 발급 결과 조회시 발급 결과는 성공, 대기 순번은 -1로 반환된다.")
 	@Test
-	void IssueCouponSuccessfully() {
+	void findPositionWhenIssueCouponSuccessfully() {
 		//given
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 		Coupon coupon = createCoupon(10, 0);
@@ -169,7 +169,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 
 	@DisplayName("쿠폰 발급 실패한다면 발급 결과 조회시 발급 결과는 실패, 대기 순번은 -1로 반환된다.")
 	@Test
-	void failToIssueCoupon() {
+	void findPositionWhenFailToIssueCoupon() {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
@@ -184,7 +184,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 
 	@DisplayName("쿠폰 발급중이라면 발급 결과 조회시 발급 결과는 발급중, 현재 대기열 순번이 반환된다.")
 	@Test
-	void inProgressWhenCouponIsBeingIssued() throws InterruptedException {
+	void findPositionWhenCouponIsBeingIssued() throws InterruptedException {
 		//given
 		int maxIssueCount = 10;
 		Coupon coupon = createCoupon(10, 0);
