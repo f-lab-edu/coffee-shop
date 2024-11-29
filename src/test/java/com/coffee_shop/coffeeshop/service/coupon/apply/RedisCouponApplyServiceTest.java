@@ -20,6 +20,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
+import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.consumer.RedisCouponConsumer;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.AppliedUserRepository;
@@ -31,6 +32,7 @@ import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	@Autowired
@@ -55,7 +57,7 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	private RedisTemplate<String, Long> redisTemplate;
 
 	@Autowired
-	private CouponApplyService redisCouponApplyServiceImpl;
+	private RedisCouponApplyService redisCouponApplyService;
 
 	@MockBean
 	private RedisCouponConsumer redisCouponConsumer;
@@ -65,7 +67,7 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		couponTransactionHistoryRepository.deleteAllInBatch();
 		couponRepository.deleteAllInBatch();
 		userRepository.deleteAllInBatch();
-		clearAll();
+		// clearAll();
 	}
 
 	@DisplayName("고객이 쿠폰 발급 신청할경우 sorted set에 쌓인다.")
@@ -77,7 +79,7 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()));
+		redisCouponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
 		assertThat(couponIssueRepository.count()).isEqualTo(1);
@@ -105,7 +107,7 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					redisCouponApplyServiceImpl.applyCoupon(createRequest(users.remove(), coupon.getId()));
+					redisCouponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -132,7 +134,7 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId())))
+			() -> redisCouponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId())))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("쿠폰이 모두 소진되어 발급할 수 없습니다.");
 	}
@@ -149,9 +151,89 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 
 		//when, then
 		assertThatThrownBy(
-			() -> redisCouponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId())))
+			() -> redisCouponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId())))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
+	}
+
+	@DisplayName("쿠폰 발급이 완료된다면 발급 결과 조회시 발급 결과는 성공, 대기 순번은 -1로 반환된다.")
+	@Test
+	void findPositionWhenIssueCouponSuccessfully() {
+		//given
+		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
+		Coupon coupon = createCoupon(10, 0);
+		User user = createUser();
+
+		createCouponTransactionHistory(coupon, user, issueDateTime);
+
+		//when
+		CouponApplyResponse response = redisCouponApplyService.isCouponIssued(user.getId(), coupon.getId());
+
+		//then
+		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.SUCCESS);
+		assertThat(response.getPosition()).isEqualTo(-1);
+	}
+
+	@DisplayName("쿠폰 발급 실패한다면 발급 결과 조회시 발급 결과는 실패, 대기 순번은 -1로 반환된다.")
+	@Test
+	void findPositionWhenFailToIssueCoupon() {
+		//given
+		Coupon coupon = createCoupon(10, 0);
+		User user = createUser();
+
+		//when
+		CouponApplyResponse response = redisCouponApplyService.isCouponIssued(user.getId(), coupon.getId());
+
+		//then
+		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.FAILURE);
+		assertThat(response.getPosition()).isEqualTo(-1);
+	}
+
+	@DisplayName("쿠폰 발급중이라면 발급 결과 조회시 발급 결과는 발급중, 현재 대기열 순번이 반환된다.")
+	@Test
+	void findPositionWhenCouponIsBeingIssued() throws InterruptedException {
+		//given
+		int maxIssueCount = 10;
+		Coupon coupon = createCoupon(10, 0);
+
+		ExecutorService executorService = Executors.newFixedThreadPool(32);
+		CountDownLatch latch = new CountDownLatch(maxIssueCount);
+
+		int expectedPosition = 3;
+		Long expectedUserId = null;
+		Queue<Long> users = new ConcurrentLinkedDeque<>();
+
+		for (int i = 0; i < maxIssueCount; i++) {
+			User user = createUser();
+			users.add(user.getId());
+			if (i == expectedPosition - 1) {
+				expectedUserId = user.getId();
+			}
+		}
+
+		for (int i = 0; i < maxIssueCount; i++) {
+			executorService.submit(() -> {
+				try {
+					redisCouponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					latch.countDown();
+				}
+
+			});
+			Thread.sleep(1000);
+		}
+
+		latch.await();
+
+		//when
+		CouponApplyResponse response = redisCouponApplyService.isCouponIssued(expectedUserId, coupon.getId());
+		System.out.println("expectedUserId = " + expectedUserId);
+		//then
+		assertThat(couponIssueRepository.count()).isEqualTo(maxIssueCount);
+		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.IN_PROGRESS);
+		assertThat(response.getPosition()).isEqualTo(expectedPosition);
 	}
 
 	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
