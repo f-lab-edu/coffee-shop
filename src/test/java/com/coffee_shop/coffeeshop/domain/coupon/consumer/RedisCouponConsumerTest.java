@@ -127,7 +127,6 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		int maxIssueCount = 20;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 
-		//20명 유저 생성
 		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
@@ -208,7 +207,6 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		int maxIssueCount = 19;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 
-		//20명 유저 생성
 		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
@@ -253,7 +251,6 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		int issueCount = 19;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 
-		//20명 유저 생성
 		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < issueCount; i++) {
 			User user = createUser();
@@ -297,7 +294,6 @@ class RedisCouponConsumerTest extends IntegrationTestSupport {
 		int maxIssueCount = 10;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 
-		//20명 유저 생성
 		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();

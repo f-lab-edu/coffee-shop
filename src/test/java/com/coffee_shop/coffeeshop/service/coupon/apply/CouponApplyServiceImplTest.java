@@ -72,7 +72,6 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
 		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
@@ -87,9 +86,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		//given
 		int maxIssueCount = 20;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
-		//1000명 유저 생성
 		Queue<Long> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
@@ -124,8 +121,6 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 10);
 		User user = createUser();
-
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when, then
 		assertThatThrownBy(

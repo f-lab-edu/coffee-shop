@@ -76,7 +76,6 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
 		redisCouponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
@@ -91,7 +90,6 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		//given
 		int maxIssueCount = 10;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		Queue<Long> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
@@ -131,7 +129,6 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(1, 0);
 		User user = createUser();
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		couponIssueCountRepository.increment(coupon.getId());
 
@@ -148,7 +145,6 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		appliedUserRepository.add(user.getId());
 

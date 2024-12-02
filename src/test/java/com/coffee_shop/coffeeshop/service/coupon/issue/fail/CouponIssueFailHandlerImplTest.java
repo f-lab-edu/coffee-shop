@@ -7,7 +7,6 @@ import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -70,7 +69,6 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		int maxFailCount = 3;
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		doThrow(new RuntimeException()).when(couponIssueService).issueCoupon(any(CouponApplication.class));
 
@@ -113,15 +111,12 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
-
 		//log 체크
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
 		Logger logger = (Logger)LoggerFactory.getLogger(CouponIssueFailHandlerImpl.class);
 		logger.addAppender(listAppender);
 		listAppender.start();
 
-		//10명 유저 생성
 		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
@@ -182,15 +177,12 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
-
 		//log 체크
 		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
 		Logger logger = (Logger)LoggerFactory.getLogger(CouponIssueFailHandlerImpl.class);
 		logger.addAppender(listAppender);
 		listAppender.start();
 
-		//1000명 유저 생성
 		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();

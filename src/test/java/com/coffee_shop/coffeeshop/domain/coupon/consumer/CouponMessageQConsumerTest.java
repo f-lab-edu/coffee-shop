@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -56,7 +55,6 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
 		messageQ.addMessage(CouponApplication.of(user, coupon));
@@ -80,8 +78,6 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		//given
 		int maxIssueCount = 10;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
-
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
