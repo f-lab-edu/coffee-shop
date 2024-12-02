@@ -1,5 +1,6 @@
 package com.coffee_shop.coffeeshop.domain.coupon.consumer;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@ConditionalOnProperty(name = "schedule.active", havingValue = "messageQ")
 public class CouponMessageQConsumer implements CouponConsumer {
 	private final MessageQ messageQ;
 	private final CouponIssueFailHandlerImpl couponIssueFailHandler;
