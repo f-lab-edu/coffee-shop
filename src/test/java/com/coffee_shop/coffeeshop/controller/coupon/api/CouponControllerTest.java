@@ -9,22 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import com.coffee_shop.coffeeshop.controller.RestDocsSupport;
-import com.coffee_shop.coffeeshop.controller.coupon.CouponController;
 import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponSaveRequest;
 import com.coffee_shop.coffeeshop.docs.coupon.CouponDocumentation;
-import com.coffee_shop.coffeeshop.service.coupon.CouponService;
 
-@WebMvcTest(controllers = CouponController.class)
 class CouponControllerTest extends RestDocsSupport {
-
-	@MockBean
-	protected CouponService couponService;
-
 	@DisplayName("쿠폰 등록 시 쿠폰명은 필수값이다.")
 	@Test
 	void createCouponWhenNameIsEmpty() throws Exception {

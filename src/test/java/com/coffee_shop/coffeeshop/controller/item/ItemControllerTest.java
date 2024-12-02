@@ -10,8 +10,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 
@@ -20,15 +18,9 @@ import com.coffee_shop.coffeeshop.controller.item.dto.request.ItemSaveRequest;
 import com.coffee_shop.coffeeshop.controller.item.dto.request.ItemUpdateRequest;
 import com.coffee_shop.coffeeshop.docs.item.ItemDocumentation;
 import com.coffee_shop.coffeeshop.domain.item.ItemType;
-import com.coffee_shop.coffeeshop.service.item.ItemService;
 import com.coffee_shop.coffeeshop.service.item.dto.response.ItemResponse;
 
-@WebMvcTest(controllers = ItemController.class)
 class ItemControllerTest extends RestDocsSupport {
-
-	@MockBean
-	protected ItemService itemService;
-
 	@DisplayName("상품을 등록한다")
 	@Test
 	void createItem() throws Exception {
