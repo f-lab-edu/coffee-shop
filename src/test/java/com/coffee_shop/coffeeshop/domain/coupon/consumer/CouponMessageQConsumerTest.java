@@ -16,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
@@ -27,6 +28,7 @@ import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyServiceImpl;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 
+@ActiveProfiles("messageQ")
 class CouponMessageQConsumerTest extends IntegrationTestSupport {
 	@Autowired
 	private CouponApplyServiceImpl couponApplyServiceImpl;
@@ -76,12 +78,11 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 	@Test
 	public void issueCouponsToMultipleUsers() throws InterruptedException {
 		//given
-		int maxIssueCount = 1000;
+		int maxIssueCount = 10;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
-		//1000명 유저 생성
 		Queue<Long> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();

@@ -45,9 +45,6 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 	private CouponRepository couponRepository;
 
 	@Autowired
-	private RedisCouponIssueFailHandler redisCouponIssueFailHandler;
-
-	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
 	@Autowired

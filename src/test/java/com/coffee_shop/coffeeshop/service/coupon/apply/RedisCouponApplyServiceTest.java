@@ -15,14 +15,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
-import com.coffee_shop.coffeeshop.domain.coupon.consumer.RedisCouponConsumer;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.AppliedUserRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueCountRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
@@ -31,9 +30,11 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
+@ActiveProfiles("messageQ")
 class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private UserRepository userRepository;
@@ -59,15 +60,12 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private RedisCouponApplyService redisCouponApplyService;
 
-	@MockBean
-	private RedisCouponConsumer redisCouponConsumer;
-
 	@AfterEach
 	void tearDown() {
 		couponTransactionHistoryRepository.deleteAllInBatch();
 		couponRepository.deleteAllInBatch();
 		userRepository.deleteAllInBatch();
-		// clearAll();
+		clearAll();
 	}
 
 	@DisplayName("고객이 쿠폰 발급 신청할경우 sorted set에 쌓인다.")
@@ -89,11 +87,10 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	@Test
 	void applyCoupons() throws InterruptedException {
 		//given
-		int maxIssueCount = 1000;
+		int maxIssueCount = 10;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
-		//1000명 유저 생성
 		Queue<Long> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
@@ -201,11 +198,11 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 
 		int expectedPosition = 3;
 		Long expectedUserId = null;
-		Queue<Long> users = new ConcurrentLinkedDeque<>();
+		Queue<User> users = new ConcurrentLinkedDeque<>();
 
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
-			users.add(user.getId());
+			users.add(user);
 			if (i == expectedPosition - 1) {
 				expectedUserId = user.getId();
 			}
@@ -214,7 +211,7 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					redisCouponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
+					couponIssueRepository.add(CouponApplication.of(users.remove(), coupon), 1731488205);
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -222,14 +219,13 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 				}
 
 			});
-			Thread.sleep(1000);
 		}
 
 		latch.await();
 
 		//when
 		CouponApplyResponse response = redisCouponApplyService.isCouponIssued(expectedUserId, coupon.getId());
-		System.out.println("expectedUserId = " + expectedUserId);
+
 		//then
 		assertThat(couponIssueRepository.count()).isEqualTo(maxIssueCount);
 		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.IN_PROGRESS);

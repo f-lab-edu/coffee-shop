@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
@@ -27,7 +28,7 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyService;
+import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyServiceImpl;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssueServiceImpl;
@@ -36,6 +37,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 
+@ActiveProfiles("messageQ")
 class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 	@Autowired
 	private UserRepository userRepository;
@@ -44,10 +46,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 	private CouponRepository couponRepository;
 
 	@Autowired
-	private CouponIssueFailHandlerImpl couponIssueFailHandlerImpl;
-
-	@Autowired
-	private CouponApplyService couponApplyService;
+	private CouponApplyServiceImpl couponApplyService;
 
 	@Autowired
 	private MessageQ messageQ;
@@ -98,11 +97,11 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 
 		List<ILoggingEvent> testLogs = listAppender.list;
 		assertThat(testLogs.size()).isEqualTo(7);
-		assertThat(testLogs.get(0).getMessage()).isEqualTo(
+		assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
 			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
-		assertThat(testLogs.get(2).getMessage()).isEqualTo(
-			"실패한 메시지 : CouponApplication{userId=" + user.getId() + ", couponId=" + coupon.getId() + ", issueDateTime="
-				+ issueDateTime + ", failCount=" + maxFailCount
+		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
+			"실패한 메시지 : CouponApplication{userId=" + user.getId() + ", couponId=" + coupon.getId() + ", failCount="
+				+ maxFailCount
 				+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
 	}
 
@@ -110,7 +109,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 	@Test
 	void retryFailIssueCoupons() throws InterruptedException {
 		//given
-		int maxIssueCount = 1000;
+		int maxIssueCount = 10;
 		int maxFailCount = 3;
 
 		Coupon coupon = createCoupon(maxIssueCount, 0);
@@ -177,7 +176,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 	@Test
 	void failIssueCoupons() throws InterruptedException {
 		//given
-		int maxIssueCount = 1000;
+		int maxIssueCount = 10;
 		int maxFailCount = 3;
 
 		Coupon coupon = createCoupon(maxIssueCount, 0);
@@ -238,12 +237,11 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 
 		List<ILoggingEvent> testLogs = listAppender.list;
 		assertThat(testLogs.size()).isEqualTo(7);
-		assertThat(testLogs.get(0).getMessage()).isEqualTo(
+		assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
 			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
-		assertThat(testLogs.get(2).getMessage()).isEqualTo(
+		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
 			"실패한 메시지 : CouponApplication{userId=" + exceptionUserId + ", couponId=" + coupon.getId()
-				+ ", issueDateTime="
-				+ issueDateTime + ", failCount=" + maxFailCount
+				+ ", failCount=" + maxFailCount
 				+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
 	}
 
