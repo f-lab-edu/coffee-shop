@@ -30,9 +30,7 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyServiceImpl;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
-import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssueServiceImpl;
 
 import ch.qos.logback.classic.Logger;
@@ -46,9 +44,6 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 
 	@Autowired
 	private CouponRepository couponRepository;
-
-	@Autowired
-	private CouponApplyServiceImpl couponApplyService;
 
 	@Autowired
 	private MessageQ messageQ;
@@ -85,7 +80,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		listAppender.start();
 
 		//when
-		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
+		messageQ.addMessage(CouponApplication.of(user, coupon));
 
 		//then
 		await()
@@ -127,10 +122,10 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		listAppender.start();
 
 		//10명 유저 생성
-		Queue<Long> users = new ConcurrentLinkedDeque<>();
+		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
-			users.add(user.getId());
+			users.add(user);
 			if (i == 0) {
 				exceptionUserId = user.getId();
 			}
@@ -151,7 +146,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
+					messageQ.addMessage(CouponApplication.of(users.remove(), coupon));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -196,10 +191,10 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		listAppender.start();
 
 		//1000명 유저 생성
-		Queue<Long> users = new ConcurrentLinkedDeque<>();
+		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
-			users.add(user.getId());
+			users.add(user);
 			if (i == 2) {
 				exceptionUserId = user.getId();
 			}
@@ -220,7 +215,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
+					messageQ.addMessage(CouponApplication.of(users.remove(), coupon));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -251,13 +246,6 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 						+ ", failCount=" + maxFailCount
 						+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
 			});
-	}
-
-	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
-		return CouponApplyServiceRequest.builder()
-			.userId(userId)
-			.couponId(couponId)
-			.build();
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {

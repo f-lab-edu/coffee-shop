@@ -27,14 +27,10 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyServiceImpl;
-import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 
 @ActiveProfiles("messageQ")
 class CouponMessageQConsumerTest extends IntegrationTestSupport {
-	@Autowired
-	private CouponApplyServiceImpl couponApplyServiceImpl;
-
 	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
@@ -63,7 +59,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()));
+		messageQ.addMessage(CouponApplication.of(user, coupon));
 
 		//then
 		await()
@@ -87,10 +83,10 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 
 		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
-		Queue<Long> users = new ConcurrentLinkedDeque<>();
+		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
-			users.add(user.getId());
+			users.add(user);
 		}
 
 		//when
@@ -100,7 +96,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyServiceImpl.applyCoupon(createRequest(users.remove(), coupon.getId()));
+					messageQ.addMessage(CouponApplication.of(users.remove(), coupon));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -121,13 +117,6 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 
 				assertTrue(messageQ.isEmpty());
 			});
-	}
-
-	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
-		return CouponApplyServiceRequest.builder()
-			.userId(userId)
-			.couponId(couponId)
-			.build();
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {
