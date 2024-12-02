@@ -2,7 +2,7 @@ package com.coffee_shop.coffeeshop.domain.coupon.repository;
 
 import org.springframework.stereotype.Repository;
 
-import com.coffee_shop.coffeeshop.common.domain.RedisIncrRepository;
+import com.coffee_shop.coffeeshop.common.domain.RedisRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,14 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 @Repository
 public class CouponFailCountRepository {
 	private static final String COUPON_FAIL_COUNT_KEY_PREFIX = "coupon_fail_count:";
-	private final RedisIncrRepository redisIncrRepository;
+	private final RedisRepository redisRepository;
 
 	public Long increment(Long userId) {
-		return redisIncrRepository.increment(getKey(userId));
+		return redisRepository.increment(getKey(userId));
 	}
 
 	public Long getIssueCount(Long userId) {
-		return redisIncrRepository.getIssueCount(getKey(userId));
+		return redisRepository.getIssueCount(getKey(userId));
 	}
 
 	private String getKey(Long userId) {

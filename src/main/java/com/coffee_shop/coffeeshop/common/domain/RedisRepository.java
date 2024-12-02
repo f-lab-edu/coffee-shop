@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Repository
-public class RedisIncrRepository {
+public class RedisRepository {
 	private final RedisTemplate<String, Long> redisTemplate;
 
 	public Long increment(String key) {
