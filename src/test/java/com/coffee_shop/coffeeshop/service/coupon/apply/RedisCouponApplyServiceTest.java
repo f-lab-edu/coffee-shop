@@ -1,7 +1,9 @@
 package com.coffee_shop.coffeeshop.service.coupon.apply;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
+import static java.util.concurrent.TimeUnit.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 
 import java.time.LocalDateTime;
 import java.util.Queue;
@@ -116,7 +118,11 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		latch.await();
 
 		//then
-		assertThat(couponIssueRepository.count()).isEqualTo(maxIssueCount);
+		await()
+			.atMost(4, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponIssueRepository.count()).isEqualTo(maxIssueCount);
+			});
 	}
 
 	@DisplayName("선착순 쿠폰 수량이 소진된 경우 쿠폰 발급 신청시 발급이 불가능하다.")

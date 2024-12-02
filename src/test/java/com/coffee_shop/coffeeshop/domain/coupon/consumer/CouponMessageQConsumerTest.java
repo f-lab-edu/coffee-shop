@@ -1,7 +1,9 @@
 package com.coffee_shop.coffeeshop.domain.coupon.consumer;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
+import static java.util.concurrent.TimeUnit.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
@@ -64,14 +66,16 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		couponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
-		Thread.sleep(1000);
+		await()
+			.atMost(2, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(1);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(1);
+				List<Coupon> coupons = couponRepository.findAll();
+				assertThat(coupons.get(0).getIssuedCount()).isEqualTo(1);
 
-		List<Coupon> coupons = couponRepository.findAll();
-		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(1);
-
-		assertTrue(messageQ.isEmpty());
+				assertTrue(messageQ.isEmpty());
+			});
 	}
 
 	@DisplayName("쿠폰을 여러명에게 발급한다.")
@@ -107,15 +111,16 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 
 		latch.await();
 
-		//then
-		Thread.sleep(4000);
+		await()
+			.atMost(4, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
+				List<Coupon> coupons = couponRepository.findAll();
+				assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
 
-		List<Coupon> coupons = couponRepository.findAll();
-		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
-
-		assertTrue(messageQ.isEmpty());
+				assertTrue(messageQ.isEmpty());
+			});
 	}
 
 	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {

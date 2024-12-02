@@ -1,7 +1,9 @@
 package com.coffee_shop.coffeeshop.service.coupon.issue.fail;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
+import static java.util.concurrent.TimeUnit.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -86,23 +88,25 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
 
 		//then
-		Thread.sleep(1000);
+		await()
+			.atMost(2, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(0);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(0);
+				int expectedIssuedCount = couponRepository.findById(coupon.getId()).get().getIssuedCount();
+				assertThat(expectedIssuedCount).isEqualTo(0);
 
-		int expectedIssuedCount = couponRepository.findById(coupon.getId()).get().getIssuedCount();
-		assertThat(expectedIssuedCount).isEqualTo(0);
+				assertTrue(messageQ.isEmpty());
 
-		assertTrue(messageQ.isEmpty());
-
-		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(7);
-		assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
-			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
-		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
-			"실패한 메시지 : CouponApplication{userId=" + user.getId() + ", couponId=" + coupon.getId() + ", failCount="
-				+ maxFailCount
-				+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
+				List<ILoggingEvent> testLogs = listAppender.list;
+				assertThat(testLogs.size()).isEqualTo(7);
+				assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
+					"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
+				assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
+					"실패한 메시지 : CouponApplication{userId=" + user.getId() + ", couponId=" + coupon.getId()
+						+ ", failCount=" + maxFailCount
+						+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
+			});
 	}
 
 	@DisplayName("여러개의 쿠폰 발급 실패 시 한개의 쿠폰발급에서 예외가 발생하면 큐의 맨앞으로 넣어 재시도후 성공하면 정상 발급한다.")
@@ -159,17 +163,19 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		latch.await();
 
 		//then
-		Thread.sleep(4000);
+		await()
+			.atMost(4, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
+				List<Coupon> coupons = couponRepository.findAll();
+				assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
 
-		List<Coupon> coupons = couponRepository.findAll();
-		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
+				assertTrue(messageQ.isEmpty());
 
-		assertTrue(messageQ.isEmpty());
-
-		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(0);
+				List<ILoggingEvent> testLogs = listAppender.list;
+				assertThat(testLogs.size()).isEqualTo(0);
+			});
 	}
 
 	@DisplayName("여러개의 쿠폰 발급 실패 시 한개의 쿠폰이 예외가 터져 최대 실패 회수를 초과하여 발급에 실패하면 해당 발급은 실패로그를 남기고 실패한다. 나머지는 정상 발급된다.")
@@ -226,23 +232,25 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 		latch.await();
 
 		//then
-		Thread.sleep(4000);
+		await()
+			.atMost(4, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount - 1);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount - 1);
+				List<Coupon> coupons = couponRepository.findAll();
+				assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount - 1);
 
-		List<Coupon> coupons = couponRepository.findAll();
-		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount - 1);
+				assertTrue(messageQ.isEmpty());
 
-		assertTrue(messageQ.isEmpty());
-
-		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(7);
-		assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
-			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
-		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
-			"실패한 메시지 : CouponApplication{userId=" + exceptionUserId + ", couponId=" + coupon.getId()
-				+ ", failCount=" + maxFailCount
-				+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
+				List<ILoggingEvent> testLogs = listAppender.list;
+				assertThat(testLogs.size()).isEqualTo(7);
+				assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
+					"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
+				assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
+					"실패한 메시지 : CouponApplication{userId=" + exceptionUserId + ", couponId=" + coupon.getId()
+						+ ", failCount=" + maxFailCount
+						+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
+			});
 	}
 
 	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
