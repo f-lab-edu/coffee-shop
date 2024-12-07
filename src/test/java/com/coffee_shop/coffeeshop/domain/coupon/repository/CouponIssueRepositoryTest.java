@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Set;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +43,10 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 
 		CouponApplication couponApplication1 = CouponApplication.of(user, coupon);
 		CouponApplication couponApplication2 = CouponApplication.of(user, coupon, 0);
-		CouponApplication couponApplication3 = CouponApplication.of(user, coupon, 1);
 		couponIssueRepository.add(couponApplication1, 1731488205);
 		couponIssueRepository.add(couponApplication2, 1731488206);
-		couponIssueRepository.add(couponApplication3, 1731488206);
 
-		Assertions.assertThat(couponIssueRepository.count()).isEqualTo(2L);
+		assertThat(couponIssueRepository.count()).isEqualTo(1L);
 	}
 
 	@Test
@@ -61,12 +58,12 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 		couponIssueRepository.add(CouponApplication.of(user1, coupon), 1731488205);
 		couponIssueRepository.add(CouponApplication.of(user2, coupon), 1731488206);
 
-		Assertions.assertThat(couponIssueRepository.count()).isEqualTo(2L);
+		assertThat(couponIssueRepository.count()).isEqualTo(2L);
 	}
 
 	@Test
 	void countWhenKeyDoesNotExist() {
-		Assertions.assertThat(couponIssueRepository.count()).isEqualTo(0L);
+		assertThat(couponIssueRepository.count()).isEqualTo(0L);
 	}
 
 	@Test
@@ -99,6 +96,42 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 				CouponApplication.of(user1, coupon, 0),
 				CouponApplication.of(user2, coupon, 0)
 			);
+	}
+
+	@Test
+	void findPosition() {
+		Coupon coupon = createCoupon();
+		User user1 = createUser();
+		User user2 = createUser();
+
+		CouponApplication couponApplication1 = CouponApplication.of(user1, coupon);
+		CouponApplication couponApplication2 = CouponApplication.of(user2, coupon);
+		couponIssueRepository.add(couponApplication1, 1731488205);
+		couponIssueRepository.add(couponApplication2, 1731488206);
+
+		assertThat(couponIssueRepository.findPosition(couponApplication1)).isEqualTo(0L);
+		assertThat(couponIssueRepository.findPosition(couponApplication2)).isEqualTo(1L);
+	}
+
+	@Test
+	void findPositionWhenQueueDoesNotExist() {
+		Coupon coupon = createCoupon();
+		User user = createUser();
+		CouponApplication couponApplication = CouponApplication.of(user, coupon);
+
+		assertThat(couponIssueRepository.findPosition(couponApplication)).isEqualTo(null);
+	}
+
+	@Test
+	void findPositionWhenValueDoesNotExist() {
+		Coupon coupon = createCoupon();
+		User user1 = createUser();
+		User user2 = createUser();
+		CouponApplication couponApplication = CouponApplication.of(user1, coupon);
+		CouponApplication couponApplication2 = CouponApplication.of(user2, coupon);
+		couponIssueRepository.add(couponApplication, 1731488206);
+
+		assertThat(couponIssueRepository.findPosition(couponApplication2)).isEqualTo(null);
 	}
 
 	private void clearAll() {

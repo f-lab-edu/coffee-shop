@@ -32,6 +32,10 @@ public class CouponIssueRepository {
 		return count() == 0L;
 	}
 
+	public Long findPosition(CouponApplication application) {
+		return redisTemplateJson.opsForZSet().rank(COUPON_QUEUE_KEY_PREFIX, application);
+	}
+
 	public Set<ZSetOperations.TypedTuple<Object>> popMin(long count) {
 		return redisTemplateJson
 			.opsForZSet()

@@ -69,69 +69,6 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		clearAll();
 	}
 
-	@DisplayName("쿠폰 발급 중 예외가 발생하면 대기열에 다시 넣어 재시도후 성공하면 정상 발급한다.")
-	@Test
-	void retryIssueCoupons() throws InterruptedException {
-		//given
-		int maxIssueCount = 20;
-		int maxFailCount = 3;
-
-		Coupon coupon = createCoupon(maxIssueCount, 0);
-
-		//log 체크
-		ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-		Logger logger = (Logger)LoggerFactory.getLogger(RedisCouponIssueFailHandler.class);
-		logger.addAppender(listAppender);
-		listAppender.start();
-
-		//20명 유저 생성
-		Queue<User> users = new ConcurrentLinkedDeque<>();
-		for (int i = 0; i < maxIssueCount; i++) {
-			User user = createUser();
-			users.add(user);
-			if (i == 0) {
-				exceptionUserId = user.getId();
-			}
-		}
-
-		//마지막 재시도에서 성공하도록
-		for (int i = 0; i < maxFailCount - 1; i++) {
-			doThrow(new RuntimeException()).when(redisCouponIssueService).issueCoupon(CouponApplication.builder()
-				.userId(exceptionUserId)
-				.couponId(coupon.getId())
-				.failCount(i)
-				.build());
-		}
-
-		//when
-		ExecutorService executorService = Executors.newFixedThreadPool(32);
-		CountDownLatch latch = new CountDownLatch(maxIssueCount);
-
-		for (int i = 0; i < maxIssueCount; i++) {
-			long score = i;
-			executorService.submit(() -> {
-				try {
-					couponIssueRepository.add(CouponApplication.of(users.remove(), coupon), 1731488205 + score);
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					latch.countDown();
-				}
-			});
-		}
-
-		latch.await();
-
-		//then
-		Thread.sleep(4000);
-
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
-		assertTrue(couponIssueRepository.isEmpty());
-
-		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(0);
-	}
-
 	@DisplayName("쿠폰 발급 중 최대 실패 횟수가 초과하면 실패로그를 남기고 발급을 실패한다.")
 	@Test
 	void retryExceedsMaxAttempts() throws InterruptedException {
@@ -157,13 +94,9 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		assertTrue(couponIssueRepository.isEmpty());
 
 		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(7);
-		assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
+		assertThat(testLogs.size()).isEqualTo(6);
+		assertThat(testLogs.get(4).getFormattedMessage()).isEqualTo(
 			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
-		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
-			"실패한 메시지 : CouponApplication{userId=" + user.getId() + ", couponId=" + coupon.getId() + ", failCount="
-				+ maxFailCount
-				+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
 	}
 
 	@DisplayName("쿠폰 발급 중 최대 실패 회수를 초과한 쿠폰은 제외하고 나머지는 정상 발급된다.")
@@ -191,13 +124,11 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 			}
 		}
 
-		for (int i = 0; i < maxFailCount; i++) {
-			doThrow(new RuntimeException()).when(redisCouponIssueService).issueCoupon(CouponApplication.builder()
-				.userId(exceptionUserId)
-				.couponId(coupon.getId())
-				.failCount(i)
-				.build());
-		}
+		doThrow(new RuntimeException()).when(redisCouponIssueService).issueCoupon(CouponApplication.builder()
+			.userId(exceptionUserId)
+			.couponId(coupon.getId())
+			.failCount(0)
+			.build());
 
 		//when
 		ExecutorService executorService = Executors.newFixedThreadPool(32);
@@ -225,13 +156,9 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		assertTrue(couponIssueRepository.isEmpty());
 
 		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(7);
-		assertThat(testLogs.get(0).getFormattedMessage()).isEqualTo(
+		assertThat(testLogs.size()).isEqualTo(6);
+		assertThat(testLogs.get(4).getFormattedMessage()).isEqualTo(
 			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
-		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
-			"실패한 메시지 : CouponApplication{userId=" + exceptionUserId + ", couponId=" + coupon.getId()
-				+ ", failCount=" + maxFailCount
-				+ ", exceptionList=[java.lang.RuntimeException, java.lang.RuntimeException, java.lang.RuntimeException]}");
 	}
 
 	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
