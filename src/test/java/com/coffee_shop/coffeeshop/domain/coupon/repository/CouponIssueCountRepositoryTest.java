@@ -26,6 +26,7 @@ class CouponIssueCountRepositoryTest extends IntegrationTestSupport {
 
 	@AfterEach
 	void tearDown() {
+		couponRepository.deleteAllInBatch();
 		clearAll();
 	}
 

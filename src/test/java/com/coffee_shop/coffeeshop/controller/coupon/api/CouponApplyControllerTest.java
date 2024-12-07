@@ -8,25 +8,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 
 import com.coffee_shop.coffeeshop.controller.RestDocsSupport;
-import com.coffee_shop.coffeeshop.controller.coupon.CouponApplyController;
 import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponApplyRequest;
 import com.coffee_shop.coffeeshop.docs.coupon.CouponDocumentation;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
-import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyService;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
-@WebMvcTest(controllers = CouponApplyController.class)
 class CouponApplyControllerTest extends RestDocsSupport {
-
-	@MockBean
-	protected CouponApplyService couponApplyService;
-
 	@DisplayName("쿠폰 발급 시 사용자 id는 필수값이다.")
 	@Test
 	void applyCouponWhenUserIdIsNull() throws Exception {

@@ -10,7 +10,7 @@ import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
-import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponProducer;
+import com.coffee_shop.coffeeshop.domain.coupon.producer.RedisCouponProducer;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.AppliedUserRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueCountRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class RedisCouponApplyService implements CouponApplyService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;
-	private final CouponProducer redisCouponProducer;
+	private final RedisCouponProducer redisCouponProducer;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 	private final CouponIssueCountRepository couponIssueCountRepository;
 	private final AppliedUserRepository appliedUserRepository;
@@ -54,7 +54,6 @@ public class RedisCouponApplyService implements CouponApplyService {
 		}
 	}
 
-	@Transactional
 	public void applyCoupon(CouponApplyServiceRequest request) {
 		User user = findUser(request.getUserId());
 		Coupon coupon = findCoupon(request.getCouponId());

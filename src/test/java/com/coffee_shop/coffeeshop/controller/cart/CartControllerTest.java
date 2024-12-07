@@ -8,8 +8,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 
@@ -17,15 +15,9 @@ import com.coffee_shop.coffeeshop.controller.RestDocsSupport;
 import com.coffee_shop.coffeeshop.controller.cart.dto.request.CartDeleteRequest;
 import com.coffee_shop.coffeeshop.controller.cart.dto.request.CartSaveRequest;
 import com.coffee_shop.coffeeshop.docs.cart.CartDocumentation;
-import com.coffee_shop.coffeeshop.service.cart.CartService;
 import com.coffee_shop.coffeeshop.service.cart.dto.response.CartResponse;
 
-@WebMvcTest(controllers = CartController.class)
 class CartControllerTest extends RestDocsSupport {
-
-	@MockBean
-	protected CartService cartService;
-
 	@DisplayName("장바구니에 상품을 담는다")
 	@Test
 	void updateCartItem() throws Exception {

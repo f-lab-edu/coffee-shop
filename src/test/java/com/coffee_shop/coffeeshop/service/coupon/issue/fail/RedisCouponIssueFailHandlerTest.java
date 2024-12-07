@@ -45,9 +45,6 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 	private CouponRepository couponRepository;
 
 	@Autowired
-	private RedisCouponIssueFailHandler redisCouponIssueFailHandler;
-
-	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
 	@Autowired
@@ -114,7 +111,6 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		logger.addAppender(listAppender);
 		listAppender.start();
 
-		//20명 유저 생성
 		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();

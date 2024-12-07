@@ -1,5 +1,7 @@
 package com.coffee_shop.coffeeshop.common.advice;
 
+import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -37,6 +39,13 @@ public class GlobalExceptionHandler {
 		HttpRequestMethodNotSupportedException exception) {
 		ErrorResponse response = ErrorResponse.of(ErrorCode.METHOD_NOT_ALLOWED);
 		return new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED);
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	protected ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException exception) {
+		ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+		ErrorResponse response = ErrorResponse.of(errorCode, exception);
+		return new ResponseEntity<>(response, errorCode.getHttpStatus());
 	}
 
 	@ExceptionHandler(BusinessException.class)

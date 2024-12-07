@@ -3,6 +3,7 @@ package com.coffee_shop.coffeeshop.domain.coupon.consumer;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@ConditionalOnProperty(name = "schedule.active", havingValue = "redis")
 public class RedisCouponConsumer implements CouponConsumer {
 	private final CouponIssuanceRateRepository couponIssuanceRateRepository;
 	private final CouponIssueRepository couponIssueRepository;

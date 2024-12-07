@@ -9,7 +9,7 @@ import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
-import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponProducer;
+import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponMessageQProducer;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class CouponApplyServiceImpl implements CouponApplyService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;
-	private final CouponProducer couponMessageQProducer;
+	private final CouponMessageQProducer couponMessageQProducer;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
 	public CouponApplyResponse isCouponIssued(Long userId, Long couponId) {
@@ -48,7 +48,6 @@ public class CouponApplyServiceImpl implements CouponApplyService {
 		}
 	}
 
-	@Transactional
 	public void applyCoupon(CouponApplyServiceRequest request) {
 		User user = findUser(request.getUserId());
 		Coupon coupon = findCoupon(request.getCouponId());

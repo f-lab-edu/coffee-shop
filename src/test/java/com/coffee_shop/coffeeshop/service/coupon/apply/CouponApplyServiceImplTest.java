@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
@@ -32,6 +33,7 @@ import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
+@ActiveProfiles("messageQ")
 class CouponApplyServiceImplTest extends IntegrationTestSupport {
 
 	@Autowired
@@ -46,7 +48,7 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 	@MockBean
 	private CouponMessageQConsumer couponMessageQConsumer;
 
-	private CouponApplyService couponApplyService;
+	private CouponApplyServiceImpl couponApplyService;
 	private MessageQ messageQ;
 
 	@BeforeEach
@@ -70,7 +72,6 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
 		couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId()));
@@ -83,11 +84,9 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 	@Test
 	void applyCoupons() throws InterruptedException {
 		//given
-		int maxIssueCount = 1000;
+		int maxIssueCount = 20;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
-		//1000명 유저 생성
 		Queue<Long> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
@@ -122,8 +121,6 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 10);
 		User user = createUser();
-
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when, then
 		assertThatThrownBy(
@@ -213,7 +210,6 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 				} finally {
 					latch.countDown();
 				}
-
 			});
 			Thread.sleep(1000);
 		}

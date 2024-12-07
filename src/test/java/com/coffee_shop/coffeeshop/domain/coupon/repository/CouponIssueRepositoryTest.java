@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.user.User;
@@ -18,6 +19,7 @@ import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 
+@ActiveProfiles("messageQ")
 class CouponIssueRepositoryTest extends IntegrationTestSupport {
 	@Autowired
 	private UserRepository userRepository;
@@ -33,6 +35,8 @@ class CouponIssueRepositoryTest extends IntegrationTestSupport {
 
 	@AfterEach
 	void tearDown() {
+		couponRepository.deleteAllInBatch();
+		userRepository.deleteAllInBatch();
 		clearAll();
 	}
 

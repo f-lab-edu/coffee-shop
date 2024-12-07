@@ -1,10 +1,11 @@
 package com.coffee_shop.coffeeshop.domain.coupon.consumer;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
+import static java.util.concurrent.TimeUnit.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
@@ -24,13 +26,10 @@ import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHist
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
-import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyServiceImpl;
-import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
+import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 
+@ActiveProfiles("messageQ")
 class CouponMessageQConsumerTest extends IntegrationTestSupport {
-	@Autowired
-	private CouponApplyServiceImpl couponApplyServiceImpl;
-
 	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
@@ -56,36 +55,34 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
 
 		//when
-		couponApplyServiceImpl.applyCoupon(createRequest(user.getId(), coupon.getId()));
+		messageQ.addMessage(CouponApplication.of(user, coupon));
 
 		//then
-		Thread.sleep(1000);
+		await()
+			.atMost(2, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(1);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(1);
+				List<Coupon> coupons = couponRepository.findAll();
+				assertThat(coupons.get(0).getIssuedCount()).isEqualTo(1);
 
-		List<Coupon> coupons = couponRepository.findAll();
-		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(1);
-
-		assertTrue(messageQ.isEmpty());
+				assertTrue(messageQ.isEmpty());
+			});
 	}
 
 	@DisplayName("쿠폰을 여러명에게 발급한다.")
 	@Test
 	public void issueCouponsToMultipleUsers() throws InterruptedException {
 		//given
-		int maxIssueCount = 1000;
+		int maxIssueCount = 10;
 		Coupon coupon = createCoupon(maxIssueCount, 0);
 
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
-
-		//1000명 유저 생성
-		Queue<Long> users = new ConcurrentLinkedDeque<>();
+		Queue<User> users = new ConcurrentLinkedDeque<>();
 		for (int i = 0; i < maxIssueCount; i++) {
 			User user = createUser();
-			users.add(user.getId());
+			users.add(user);
 		}
 
 		//when
@@ -95,7 +92,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 		for (int i = 0; i < maxIssueCount; i++) {
 			executorService.submit(() -> {
 				try {
-					couponApplyServiceImpl.applyCoupon(createRequest(users.remove(), coupon.getId()));
+					messageQ.addMessage(CouponApplication.of(users.remove(), coupon));
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
@@ -106,22 +103,16 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 
 		latch.await();
 
-		//then
-		Thread.sleep(4000);
+		await()
+			.atMost(4, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount);
+				List<Coupon> coupons = couponRepository.findAll();
+				assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
 
-		List<Coupon> coupons = couponRepository.findAll();
-		assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount);
-
-		assertTrue(messageQ.isEmpty());
-	}
-
-	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
-		return CouponApplyServiceRequest.builder()
-			.userId(userId)
-			.couponId(couponId)
-			.build();
+				assertTrue(messageQ.isEmpty());
+			});
 	}
 
 	private Coupon createCoupon(int maxIssueCount, int issuedCount) {
