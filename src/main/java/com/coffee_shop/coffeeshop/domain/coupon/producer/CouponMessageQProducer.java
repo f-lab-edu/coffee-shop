@@ -17,10 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class CouponMessageQProducer implements CouponProducer {
+public class CouponMessageQProducer {
 	private final MessageQ messageQ;
 
-	@Override
 	public void applyCoupon(User user, Coupon coupon) {
 		CouponApplication couponApplication = CouponApplication.of(user, coupon);
 		try {
@@ -32,7 +31,6 @@ public class CouponMessageQProducer implements CouponProducer {
 		}
 	}
 
-	@Override
 	public int getPosition(User user, Coupon coupon) {
 		ArrayList<CouponApplication> couponApplications = messageQ.toArrayList();
 		int qSize = couponApplications.size();

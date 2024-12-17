@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class CouponIssueFailHandlerImpl implements CouponIssueFailHandler {
+public class CouponIssueFailHandlerImpl {
 	private static final int MAX_FAIL_COUNT = 3;
 	private final MessageQ messageQ;
 

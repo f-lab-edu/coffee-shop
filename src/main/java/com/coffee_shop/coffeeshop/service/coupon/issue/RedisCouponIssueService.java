@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class RedisCouponIssueService implements CouponIssueService {
+public class RedisCouponIssueService {
 	private static final int SYNC_COUNT = 10;
 	private final CouponService couponService;
 	private final UserRepository userRepository;
