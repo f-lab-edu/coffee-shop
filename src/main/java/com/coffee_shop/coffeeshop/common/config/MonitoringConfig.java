@@ -24,6 +24,9 @@ public class MonitoringConfig {
 	@Value("${spring.datasource.url}")
 	private String url;
 
+	@Value("${spring.datasource.hikari.maximumPoolSize}")
+	private int maximumPoolSize;
+
 	@Bean
 	public DataSource dataSource() {
 		HikariConfig config = new HikariConfig();
@@ -31,6 +34,7 @@ public class MonitoringConfig {
 		config.setPassword(password);
 		config.setJdbcUrl(url);
 		config.setMetricsTrackerFactory(metricsTrackerFactory());
+		config.setMaximumPoolSize(maximumPoolSize);
 		return new HikariDataSource(config);
 	}
 
