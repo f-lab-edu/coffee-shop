@@ -91,8 +91,8 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		assertTrue(couponIssueRepository.isEmpty());
 
 		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(6);
-		assertThat(testLogs.get(4).getFormattedMessage()).isEqualTo(
+		assertThat(testLogs.size()).isEqualTo(3);
+		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
 			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
 	}
 
@@ -152,8 +152,8 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		assertTrue(couponIssueRepository.isEmpty());
 
 		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(6);
-		assertThat(testLogs.get(4).getFormattedMessage()).isEqualTo(
+		assertThat(testLogs.size()).isEqualTo(3);
+		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
 			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
 	}
 
