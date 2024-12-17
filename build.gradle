@@ -64,6 +64,9 @@ dependencies {
 
     // prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.prometheus:simpleclient:0.16.0'
+    implementation 'io.prometheus:simpleclient_hotspot:0.16.0'
+    implementation 'io.prometheus:simpleclient_common:0.16.0'
 
     // test containers
     testImplementation "org.junit.jupiter:junit-jupiter:5.8.1"
