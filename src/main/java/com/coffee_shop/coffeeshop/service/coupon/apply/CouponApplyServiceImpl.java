@@ -2,6 +2,7 @@ package com.coffee_shop.coffeeshop.service.coupon.apply;
 
 import java.util.Optional;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
+@ConditionalOnProperty(name = "schedule.active", havingValue = "messageQ")
 public class CouponApplyServiceImpl implements CouponApplyService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;

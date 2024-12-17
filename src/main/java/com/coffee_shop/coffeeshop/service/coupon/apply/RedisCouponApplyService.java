@@ -2,7 +2,7 @@ package com.coffee_shop.coffeeshop.service.coupon.apply;
 
 import java.util.Optional;
 
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +23,10 @@ import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyRespons
 
 import lombok.RequiredArgsConstructor;
 
-@Primary
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
+@ConditionalOnProperty(name = "schedule.active", havingValue = "redis")
 public class RedisCouponApplyService implements CouponApplyService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;

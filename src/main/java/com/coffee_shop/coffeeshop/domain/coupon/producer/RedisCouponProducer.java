@@ -1,6 +1,5 @@
 package com.coffee_shop.coffeeshop.domain.coupon.producer;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
@@ -13,7 +12,6 @@ import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Primary
 @Slf4j
 @RequiredArgsConstructor
 @Component
