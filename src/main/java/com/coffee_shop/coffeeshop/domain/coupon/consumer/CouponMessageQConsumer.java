@@ -17,12 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Component
 @ConditionalOnProperty(name = "schedule.active", havingValue = "messageQ")
-public class CouponMessageQConsumer implements CouponConsumer {
+public class CouponMessageQConsumer {
 	private final MessageQ messageQ;
 	private final CouponIssueFailHandlerImpl couponIssueFailHandler;
 	private final CouponIssueServiceImpl couponIssueService;
 
-	@Override
 	@Scheduled(cron = "0/1 * * * * *")
 	public synchronized void issueCoupon() {
 		while (!messageQ.isEmpty()) {
