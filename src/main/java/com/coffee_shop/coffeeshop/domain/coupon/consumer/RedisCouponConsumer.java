@@ -22,13 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Component
 @ConditionalOnProperty(name = "schedule.active", havingValue = "redis")
-public class RedisCouponConsumer implements CouponConsumer {
+public class RedisCouponConsumer {
 	private final CouponIssuanceRateRepository couponIssuanceRateRepository;
 	private final CouponIssueRepository couponIssueRepository;
 	private final RedisCouponIssueFailHandler redisCouponIssueFailHandler;
 	private final RedisCouponIssueService redisCouponIssueService;
 
-	@Override
 	@Scheduled(fixedRate = 1000)
 	public void issueCoupon() {
 		if (couponIssueRepository.isEmpty()) {
