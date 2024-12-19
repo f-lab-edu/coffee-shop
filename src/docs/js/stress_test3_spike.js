@@ -10,7 +10,7 @@ const userIds = new redis.Client({
     },
 });
 
-const BASE_URL = 'http://49.50.175.80:8080';
+const BASE_URL = 'http://101.101.209.62';
 // const BASE_URL = 'http://localhost:8080';
 const COUPON_ID = 1;
 const listKey = 'stress-test';
