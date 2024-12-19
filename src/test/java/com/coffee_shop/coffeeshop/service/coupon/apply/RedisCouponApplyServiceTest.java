@@ -22,10 +22,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
+import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueFailHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.AppliedUserRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueCountRepository;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueFailHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
@@ -48,6 +50,9 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
 	@Autowired
+	private CouponIssueFailHistoryRepository couponIssueFailHistoryRepository;
+
+	@Autowired
 	private CouponIssueRepository couponIssueRepository;
 
 	@Autowired
@@ -65,6 +70,7 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	@AfterEach
 	void tearDown() {
 		couponTransactionHistoryRepository.deleteAllInBatch();
+		couponIssueFailHistoryRepository.deleteAllInBatch();
 		couponRepository.deleteAllInBatch();
 		userRepository.deleteAllInBatch();
 		clearAll();
@@ -179,6 +185,9 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
+
+		CouponIssueFailHistory couponIssueFailHistory = CouponIssueFailHistory.of(user, coupon, LocalDateTime.now());
+		couponIssueFailHistoryRepository.save(couponIssueFailHistory);
 
 		//when
 		CouponApplyResponse response = redisCouponApplyService.isCouponIssued(user.getId(), coupon.getId());
