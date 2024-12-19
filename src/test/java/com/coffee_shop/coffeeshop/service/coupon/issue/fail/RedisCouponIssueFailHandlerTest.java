@@ -23,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueFailHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
@@ -48,6 +49,9 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
 	@Autowired
+	private CouponIssueFailHistoryRepository couponIssueFailHistoryRepository;
+
+	@Autowired
 	private CouponIssueRepository couponIssueRepository;
 
 	@Autowired
@@ -61,6 +65,7 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 	@AfterEach
 	void tearDown() {
 		couponTransactionHistoryRepository.deleteAllInBatch();
+		couponIssueFailHistoryRepository.deleteAllInBatch();
 		couponRepository.deleteAllInBatch();
 		userRepository.deleteAllInBatch();
 		clearAll();
@@ -88,6 +93,8 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		Thread.sleep(3000);
 
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(0);
+		assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
+
 		assertTrue(couponIssueRepository.isEmpty());
 
 		List<ILoggingEvent> testLogs = listAppender.list;
@@ -149,6 +156,8 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		Thread.sleep(4000);
 
 		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount - 1);
+		assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
+
 		assertTrue(couponIssueRepository.isEmpty());
 
 		List<ILoggingEvent> testLogs = listAppender.list;
