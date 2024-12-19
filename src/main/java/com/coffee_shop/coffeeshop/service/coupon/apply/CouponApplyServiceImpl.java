@@ -8,9 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
+import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueFailHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponMessageQProducer;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueFailHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
@@ -20,7 +22,9 @@ import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceR
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -30,24 +34,35 @@ public class CouponApplyServiceImpl implements CouponApplyService {
 	private final CouponRepository couponRepository;
 	private final CouponMessageQProducer couponMessageQProducer;
 	private final CouponTransactionHistoryRepository couponTransactionHistoryRepository;
+	private final CouponIssueFailHistoryRepository couponIssueFailHistoryRepository;
 
 	public CouponApplyResponse isCouponIssued(Long userId, Long couponId) {
 		User user = findUser(userId);
 		Coupon coupon = findCoupon(couponId);
 
-		Optional<CouponTransactionHistory> history = couponTransactionHistoryRepository.findByCouponAndUser(
+		Optional<CouponTransactionHistory> transactionHistory = couponTransactionHistoryRepository.findByCouponAndUser(
 			coupon, user);
 
-		if (history.isPresent()) {
+		if (transactionHistory.isPresent()) {
 			return CouponApplyResponse.of(CouponIssueStatus.SUCCESS);
 		}
 
-		try {
-			int position = couponMessageQProducer.getPosition(user, coupon);
-			return CouponApplyResponse.of(CouponIssueStatus.IN_PROGRESS, position);
-		} catch (BusinessException e) {
+		Optional<CouponIssueFailHistory> failHistory = couponIssueFailHistoryRepository.findByCouponAndUser(coupon,
+			user);
+
+		if (failHistory.isPresent()) {
 			return CouponApplyResponse.of(CouponIssueStatus.FAILURE);
 		}
+
+		int position = 0;
+		try {
+			position = couponMessageQProducer.getPosition(user, coupon);
+		} catch (BusinessException e) {
+			log.warn("Position not found for userId: {}, couponId: {} in the coupon application queue.", user.getId(),
+				coupon.getId());
+		}
+
+		return CouponApplyResponse.of(CouponIssueStatus.IN_PROGRESS, position);
 	}
 
 	public void applyCoupon(CouponApplyServiceRequest request) {

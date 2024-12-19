@@ -20,11 +20,13 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
+import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueFailHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
 import com.coffee_shop.coffeeshop.domain.coupon.consumer.CouponMessageQConsumer;
 import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponMessageQProducer;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueFailHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
@@ -45,6 +47,9 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
+	@Autowired
+	private CouponIssueFailHistoryRepository couponIssueFailHistoryRepository;
+
 	@MockBean
 	private CouponMessageQConsumer couponMessageQConsumer;
 
@@ -56,12 +61,13 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		messageQ = new MessageQ();
 		CouponMessageQProducer couponMessageQProducer = new CouponMessageQProducer(messageQ);
 		couponApplyService = new CouponApplyServiceImpl(userRepository, couponRepository, couponMessageQProducer,
-			couponTransactionHistoryRepository);
+			couponTransactionHistoryRepository, couponIssueFailHistoryRepository);
 	}
 
 	@AfterEach
 	void tearDown() {
 		couponTransactionHistoryRepository.deleteAllInBatch();
+		couponIssueFailHistoryRepository.deleteAllInBatch();
 		couponRepository.deleteAllInBatch();
 		userRepository.deleteAllInBatch();
 	}
@@ -170,6 +176,9 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		//given
 		Coupon coupon = createCoupon(10, 0);
 		User user = createUser();
+
+		CouponIssueFailHistory couponIssueFailHistory = CouponIssueFailHistory.of(user, coupon, LocalDateTime.now());
+		couponIssueFailHistoryRepository.save(couponIssueFailHistory);
 
 		//when
 		CouponApplyResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
