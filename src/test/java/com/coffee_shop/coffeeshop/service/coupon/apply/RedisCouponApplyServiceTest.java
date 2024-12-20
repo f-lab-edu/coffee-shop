@@ -158,7 +158,7 @@ class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 		assertThatThrownBy(
 			() -> redisCouponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId())))
 			.isInstanceOf(BusinessException.class)
-			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
+			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID = " + user.getId());
 	}
 
 	@DisplayName("쿠폰 발급이 완료된다면 발급 결과 조회시 발급 결과는 성공, 대기 순번은 -1로 반환된다.")

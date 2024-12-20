@@ -18,9 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 public class RedisCouponProducer {
 	private final CouponIssueRepository couponIssueRepository;
 
-	public void applyCoupon(User user, Coupon coupon) {
+	public void applyCoupon(CouponApplication couponApplication) {
 		long timestamp = System.currentTimeMillis();
-		couponIssueRepository.add(CouponApplication.of(user, coupon), timestamp);
+		couponIssueRepository.add(couponApplication, timestamp);
 	}
 
 	public int getPosition(User user, Coupon coupon) {

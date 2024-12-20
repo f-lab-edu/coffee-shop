@@ -30,6 +30,13 @@ public class CouponApplication {
 		this.failCount = failCount;
 	}
 
+	public static CouponApplication of(Long userId, Long couponId) {
+		return CouponApplication.builder()
+			.userId(userId)
+			.couponId(couponId)
+			.build();
+	}
+
 	public static CouponApplication of(User user, Coupon coupon) {
 		return CouponApplication.builder()
 			.userId(user.getId())
