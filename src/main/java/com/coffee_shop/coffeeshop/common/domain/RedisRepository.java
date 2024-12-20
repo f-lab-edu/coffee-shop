@@ -24,8 +24,6 @@ public class RedisRepository {
 			.get(key);
 
 		if (issueCount == null) {
-			log.warn("Redis key '{}' does not exist or used in transaction/pipeline",
-				key);
 			return 0L;
 		}
 
