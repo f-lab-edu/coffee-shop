@@ -1,40 +1,40 @@
 services:
-  nginx:
-    container_name: nginx
-    image: nginx:stable-alpine
-    depends_on:
-      - web-application-server-1
-      - web-application-server-2
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - ${APP_PORT:-80}:80
-    networks:
-      - coffeeshop
+  #  nginx:
+  #    container_name: nginx
+  #    image: nginx:stable-alpine
+  #    depends_on:
+  #      - web-application-server-1
+  #      - web-application-server-2
+  #    volumes:
+  #      - ./nginx.conf:/etc/nginx/nginx.conf
+  #    ports:
+  #      - ${APP_PORT:-80}:80
+  #    networks:
+  #      - coffeeshop
 
-  web-application-server-1:
-    container_name: app1
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 8081:8080
-    networks:
-      - coffeeshop
-    depends_on:
-      - mariadb
-
-  web-application-server-2:
-    container_name: app2
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 8082:8080
-    networks:
-      - coffeeshop
-    depends_on:
-      - mariadb
+  #  web-application-server-1:
+  #    container_name: app1
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - 8081:8080
+  #    networks:
+  #      - coffeeshop
+  #    depends_on:
+  #      - mariadb
+  #
+  #  web-application-server-2:
+  #    container_name: app2
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - 8082:8080
+  #    networks:
+  #      - coffeeshop
+  #    depends_on:
+  #      - mariadb
 
   mariadb:
     container_name: mariadb
@@ -47,11 +47,11 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_NEW_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
       - coffeeshop-mariadb:/var/lib/mysql
-    networks:
-      - coffeeshop
+    #    networks:
+    #      - coffeeshop
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}" ]
       retries: 3
@@ -63,20 +63,20 @@ services:
     image: redis
     ports:
       - ${FORWARD_REDIS_PORT:-6379}:6379
-    networks:
-      - coffeeshop
+    #    networks:
+    #      - coffeeshop
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    networks:
-      - coffeeshop
-    ports:
-      - 9090:9090
+  #  prometheus:
+  #    image: prom/prometheus:latest
+  #    container_name: prometheus
+  #    volumes:
+  #      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #    networks:
+  #      - coffeeshop
+  #    ports:
+  #      - 9090:9090
 
   grafana:
     image: grafana/grafana:latest
@@ -86,16 +86,16 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     ports:
       - 3000:3000
-    networks:
-      - coffeeshop
+    #    networks:
+    #      - coffeeshop
     volumes:
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
 
-networks:
-  coffeeshop:
-    driver: bridge
+#networks:
+#  coffeeshop:
+#    driver: bridge
 
 volumes:
   coffeeshop-mariadb:

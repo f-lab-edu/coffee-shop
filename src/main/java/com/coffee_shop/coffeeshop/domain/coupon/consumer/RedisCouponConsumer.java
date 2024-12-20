@@ -12,6 +12,7 @@ import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssuanceRateRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
+import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssuanceRateService;
 import com.coffee_shop.coffeeshop.service.coupon.issue.RedisCouponIssueFacadeService;
 import com.coffee_shop.coffeeshop.service.coupon.issue.fail.RedisCouponIssueFailHandler;
 
@@ -27,6 +28,7 @@ public class RedisCouponConsumer {
 	private final CouponIssueRepository couponIssueRepository;
 	private final RedisCouponIssueFailHandler redisCouponIssueFailHandler;
 	private final RedisCouponIssueFacadeService redisCouponIssueFacadeService;
+	private final CouponIssuanceRateService couponIssuanceRateService;
 
 	@Scheduled(fixedRate = 1000)
 	public void issueCoupon() {
@@ -34,7 +36,7 @@ public class RedisCouponConsumer {
 			return;
 		}
 
-		long rangeCount = couponIssuanceRateRepository.getRangeCount();
+		long rangeCount = couponIssuanceRateService.getIssuanceRate();
 		Set<ZSetOperations.TypedTuple<Object>> popped = couponIssueRepository.popMin(rangeCount);
 		for (ZSetOperations.TypedTuple<Object> typedTuple : popped) {
 			Object object = typedTuple.getValue();

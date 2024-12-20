@@ -8,6 +8,8 @@ import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.exception.ErrorCode;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponSaveServiceRequest;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponIssuanceRateResponse;
+import com.coffee_shop.coffeeshop.service.coupon.issue.CouponIssuanceRateService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CouponService {
 	private static final int SYNC_COUNT = 10;
 	private final CouponRepository couponRepository;
+	private final CouponIssuanceRateService couponIssuanceRateService;
 
 	@Transactional
 	public Long createCoupon(CouponSaveServiceRequest request) {
@@ -35,6 +38,11 @@ public class CouponService {
 		}
 		
 		coupon.updateIssuedCount(increment);
+	}
+
+	public CouponIssuanceRateResponse changeIssuanceRate(int rate) {
+		int issuanceRate = couponIssuanceRateService.changeIssuanceRate(rate);
+		return CouponIssuanceRateResponse.of(issuanceRate);
 	}
 
 	private Coupon findCoupon(Long couponId) {
