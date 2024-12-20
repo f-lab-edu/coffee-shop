@@ -2,7 +2,7 @@ package com.coffee_shop.coffeeshop.service.coupon.issue;
 
 import java.time.LocalDateTime;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
+@Service
 public class RedisCouponIssueService {
 	private final UserRepository userRepository;
 	private final CouponRepository couponRepository;

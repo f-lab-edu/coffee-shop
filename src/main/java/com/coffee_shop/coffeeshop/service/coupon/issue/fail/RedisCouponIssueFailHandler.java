@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
@@ -21,7 +21,7 @@ import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@Component
+@Service
 public class RedisCouponIssueFailHandler {
 	private static final Logger log = LoggerFactory.getLogger(RedisCouponIssueFailHandler.class);
 	private static final int MAX_FAIL_COUNT = 3;
