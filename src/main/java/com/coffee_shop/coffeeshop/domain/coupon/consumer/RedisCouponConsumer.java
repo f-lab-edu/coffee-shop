@@ -52,9 +52,19 @@ public class RedisCouponConsumer {
 		try {
 			redisCouponIssueFacadeService.issueCoupon(couponApplication);
 		} catch (BusinessException e) {
-			log.info("쿠폰발급 실패 > {}", e.getMessage());
+			log.warn("쿠폰발급 실패 > {}", e.getMessage());
 		} catch (Exception e) {
-			redisCouponIssueFailHandler.handleFail(couponApplication, e);
+			handleFail(e, couponApplication);
+		}
+	}
+
+	private void handleFail(Exception exception, CouponApplication couponApplication) {
+		try {
+			redisCouponIssueFailHandler.handleFail(couponApplication, exception);
+		} catch (BusinessException e) {
+			log.warn("쿠폰 발급 재시도 실패 > {}", e.getMessage());
+		} catch (Exception e) {
+			log.warn("쿠폰 발급 재시도 실패", e);
 		}
 	}
 }
