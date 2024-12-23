@@ -12,7 +12,7 @@ import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssuanceRateRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueRepository;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
-import com.coffee_shop.coffeeshop.service.coupon.issue.RedisCouponIssueService;
+import com.coffee_shop.coffeeshop.service.coupon.issue.RedisCouponIssueFacadeService;
 import com.coffee_shop.coffeeshop.service.coupon.issue.fail.RedisCouponIssueFailHandler;
 
 import lombok.RequiredArgsConstructor;
@@ -22,13 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Component
 @ConditionalOnProperty(name = "schedule.active", havingValue = "redis")
-public class RedisCouponConsumer implements CouponConsumer {
+public class RedisCouponConsumer {
 	private final CouponIssuanceRateRepository couponIssuanceRateRepository;
 	private final CouponIssueRepository couponIssueRepository;
 	private final RedisCouponIssueFailHandler redisCouponIssueFailHandler;
-	private final RedisCouponIssueService redisCouponIssueService;
+	private final RedisCouponIssueFacadeService redisCouponIssueFacadeService;
 
-	@Override
 	@Scheduled(fixedRate = 1000)
 	public void issueCoupon() {
 		if (couponIssueRepository.isEmpty()) {
@@ -51,7 +50,7 @@ public class RedisCouponConsumer implements CouponConsumer {
 
 	private void issueCoupon(CouponApplication couponApplication) {
 		try {
-			redisCouponIssueService.issueCoupon(couponApplication);
+			redisCouponIssueFacadeService.issueCoupon(couponApplication);
 		} catch (BusinessException e) {
 			log.info("쿠폰발급 실패 > {}", e.getMessage());
 		} catch (Exception e) {
