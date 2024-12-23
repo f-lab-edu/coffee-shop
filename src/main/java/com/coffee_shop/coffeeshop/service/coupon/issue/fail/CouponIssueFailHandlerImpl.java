@@ -16,16 +16,19 @@ import lombok.extern.slf4j.Slf4j;
 public class CouponIssueFailHandlerImpl {
 	private static final int MAX_FAIL_COUNT = 3;
 	private final MessageQ messageQ;
+	private final CouponIssueFailHistoryService couponIssueFailHistoryService;
 
 	public void handleFail(CouponApplication couponApplication, Exception exception) {
 		couponApplication.addException(exception);
 		couponApplication.increaseFailCount();
 
-		if (couponApplication.getFailCount() >= MAX_FAIL_COUNT) {
-			handleTooManyFails(couponApplication);
-		} else {
+		if (MAX_FAIL_COUNT > couponApplication.getFailCount()) {
 			messageQ.addFirst(couponApplication);
+			return;
 		}
+
+		handleTooManyFails(couponApplication);
+		couponIssueFailHistoryService.saveCouponFailHistory(couponApplication);
 	}
 
 	private void handleTooManyFails(CouponApplication couponApplication) {

@@ -24,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueFailHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
@@ -50,6 +51,9 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
+	@Autowired
+	private CouponIssueFailHistoryRepository couponIssueFailHistoryRepository;
+
 	@SpyBean
 	private CouponIssueServiceImpl couponIssueService;
 
@@ -58,6 +62,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 	@AfterEach
 	void tearDown() {
 		couponTransactionHistoryRepository.deleteAllInBatch();
+		couponIssueFailHistoryRepository.deleteAllInBatch();
 		couponRepository.deleteAllInBatch();
 		userRepository.deleteAllInBatch();
 	}
@@ -85,6 +90,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 			.atMost(2, SECONDS)
 			.untilAsserted(() -> {
 				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(0);
+				assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
 
 				int expectedIssuedCount = couponRepository.findById(coupon.getId()).get().getIssuedCount();
 				assertThat(expectedIssuedCount).isEqualTo(0);
@@ -223,6 +229,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 			.atMost(4, SECONDS)
 			.untilAsserted(() -> {
 				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount - 1);
+				assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
 
 				List<Coupon> coupons = couponRepository.findAll();
 				assertThat(coupons.get(0).getIssuedCount()).isEqualTo(maxIssueCount - 1);

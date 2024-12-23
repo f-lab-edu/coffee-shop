@@ -29,10 +29,20 @@ public class CouponMessageQConsumer {
 			try {
 				couponIssueService.issueCoupon(couponApplication);
 			} catch (BusinessException e) {
-				log.info("쿠폰발급 실패 > {}", e.getMessage());
+				log.warn("쿠폰 발급 실패 > {}", e.getMessage());
 			} catch (Exception e) {
-				couponIssueFailHandler.handleFail(couponApplication, e);
+				handleFail(e, couponApplication);
 			}
+		}
+	}
+
+	private void handleFail(Exception exception, CouponApplication couponApplication) {
+		try {
+			couponIssueFailHandler.handleFail(couponApplication, exception);
+		} catch (BusinessException e) {
+			log.warn("쿠폰 발급 재시도 실패 > {}", e.getMessage());
+		} catch (Exception e) {
+			log.warn("쿠폰 발급 재시도 실패", e);
 		}
 	}
 }
