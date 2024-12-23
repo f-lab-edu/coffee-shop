@@ -36,7 +36,7 @@ import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
 import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
-@ActiveProfiles("messageQ")
+@ActiveProfiles("redis")
 class RedisCouponApplyServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private UserRepository userRepository;

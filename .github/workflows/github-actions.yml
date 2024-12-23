@@ -3,7 +3,7 @@ name: coffee-prod-deploy
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "feature/20" ]
+    branches: [ "main", "release/*" ]
 
 jobs:
   deploy:
@@ -34,14 +34,14 @@ jobs:
           source: build/libs/*.jar
           target: /app
 
-      - name: Deploy to Server2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST2 }} # 서버 IP
-          username: ${{ secrets.SERVER_USER }} # 서버 사용자 이름
-          password: ${{ secrets.SERVER_PASSWORD }} # 서버 비밀번호
-          source: build/libs/*.jar
-          target: /app
+      #      - name: Deploy to Server2
+      #        uses: appleboy/scp-action@v0.1.7
+      #        with:
+      #          host: ${{ secrets.SERVER_HOST2 }} # 서버 IP
+      #          username: ${{ secrets.SERVER_USER }} # 서버 사용자 이름
+      #          password: ${{ secrets.SERVER_PASSWORD }} # 서버 비밀번호
+      #          source: build/libs/*.jar
+      #          target: /app
 
       # Spring Boot 애플리케이션 실행 (Optional)
       - name: Restart Spring Boot Application
@@ -53,11 +53,11 @@ jobs:
           script: |
             /app/deploy.sh
 
-      - name: Restart Spring Boot Application2
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST2 }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
-            /app/deploy.sh
+#      - name: Restart Spring Boot Application2
+#        uses: appleboy/ssh-action@v1.2.0
+#        with:
+#          host: ${{ secrets.SERVER_HOST2 }}
+#          username: ${{ secrets.SERVER_USER }}
+#          password: ${{ secrets.SERVER_PASSWORD }}
+#          script: |
+#            /app/deploy.sh
