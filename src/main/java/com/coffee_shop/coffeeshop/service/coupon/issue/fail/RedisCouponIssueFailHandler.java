@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
-public class RedisCouponIssueFailHandler implements CouponIssueFailHandler {
+public class RedisCouponIssueFailHandler {
 	private static final Logger log = LoggerFactory.getLogger(RedisCouponIssueFailHandler.class);
 	private static final int MAX_FAIL_COUNT = 3;
 	private final CouponIssueRepository couponIssueRepository;

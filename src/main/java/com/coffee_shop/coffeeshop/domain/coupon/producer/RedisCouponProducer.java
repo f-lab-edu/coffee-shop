@@ -15,16 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class RedisCouponProducer implements CouponProducer {
+public class RedisCouponProducer {
 	private final CouponIssueRepository couponIssueRepository;
 
-	@Override
 	public void applyCoupon(User user, Coupon coupon) {
 		long timestamp = System.currentTimeMillis();
 		couponIssueRepository.add(CouponApplication.of(user, coupon), timestamp);
 	}
 
-	@Override
 	public int getPosition(User user, Coupon coupon) {
 		Long position = couponIssueRepository.findPosition(CouponApplication.of(user, coupon));
 		if (position == null) {
