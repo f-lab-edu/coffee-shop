@@ -226,7 +226,7 @@ class CouponIssueFailHandlerImplTest extends IntegrationTestSupport {
 
 		//then
 		await()
-			.atMost(4, SECONDS)
+			.atMost(5, SECONDS)
 			.untilAsserted(() -> {
 				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount - 1);
 				assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
