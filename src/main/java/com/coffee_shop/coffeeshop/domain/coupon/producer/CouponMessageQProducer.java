@@ -2,6 +2,7 @@ package com.coffee_shop.coffeeshop.domain.coupon.producer;
 
 import java.util.ArrayList;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
@@ -17,7 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class CouponMessageQProducer {
+@ConditionalOnProperty(name = "schedule.active", havingValue = "messageQ")
+public class CouponMessageQProducer implements CouponProducer {
 	private final MessageQ messageQ;
 
 	public void applyCoupon(User user, Coupon coupon) {
