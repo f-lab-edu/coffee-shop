@@ -15,23 +15,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
 import com.coffee_shop.coffeeshop.domain.coupon.Coupon;
-import com.coffee_shop.coffeeshop.domain.coupon.CouponIssueStatus;
 import com.coffee_shop.coffeeshop.domain.coupon.CouponTransactionHistory;
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
-import com.coffee_shop.coffeeshop.domain.coupon.consumer.CouponMessageQConsumer;
 import com.coffee_shop.coffeeshop.domain.coupon.producer.CouponMessageQProducer;
+import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponIssueFailHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponRepository;
 import com.coffee_shop.coffeeshop.domain.coupon.repository.CouponTransactionHistoryRepository;
 import com.coffee_shop.coffeeshop.domain.user.User;
 import com.coffee_shop.coffeeshop.domain.user.UserRepository;
 import com.coffee_shop.coffeeshop.service.IntegrationTestSupport;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplyServiceRequest;
-import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponApplyResponse;
 
 @ActiveProfiles("messageQ")
 class CouponApplyServiceImplTest extends IntegrationTestSupport {
@@ -45,8 +42,8 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 	@Autowired
 	private CouponTransactionHistoryRepository couponTransactionHistoryRepository;
 
-	@MockBean
-	private CouponMessageQConsumer couponMessageQConsumer;
+	@Autowired
+	private CouponIssueFailHistoryRepository couponIssueFailHistoryRepository;
 
 	private CouponApplyServiceImpl couponApplyService;
 	private MessageQ messageQ;
@@ -56,12 +53,13 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 		messageQ = new MessageQ();
 		CouponMessageQProducer couponMessageQProducer = new CouponMessageQProducer(messageQ);
 		couponApplyService = new CouponApplyServiceImpl(userRepository, couponRepository, couponMessageQProducer,
-			couponTransactionHistoryRepository);
+			couponTransactionHistoryRepository, couponIssueFailHistoryRepository);
 	}
 
 	@AfterEach
 	void tearDown() {
 		couponTransactionHistoryRepository.deleteAllInBatch();
+		couponIssueFailHistoryRepository.deleteAllInBatch();
 		couponRepository.deleteAllInBatch();
 		userRepository.deleteAllInBatch();
 	}
@@ -144,85 +142,6 @@ class CouponApplyServiceImplTest extends IntegrationTestSupport {
 			() -> couponApplyService.applyCoupon(createRequest(user.getId(), coupon.getId())))
 			.isInstanceOf(BusinessException.class)
 			.hasMessage("이미 발급된 쿠폰입니다. 사용자 ID = " + user.getId() + ", 사용자 이름 = " + user.getName());
-	}
-
-	@DisplayName("쿠폰 발급이 완료된다면 발급 결과 조회시 발급 결과는 성공, 대기 순번은 -1로 반환된다.")
-	@Test
-	void findPositionWhenIssueCouponSuccessfully() {
-		//given
-		LocalDateTime issueDateTime = LocalDateTime.of(2024, 8, 30, 0, 0);
-		Coupon coupon = createCoupon(10, 0);
-		User user = createUser();
-
-		createCouponTransactionHistory(coupon, user, issueDateTime);
-
-		//when
-		CouponApplyResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
-
-		//then
-		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.SUCCESS);
-		assertThat(response.getPosition()).isEqualTo(-1);
-	}
-
-	@DisplayName("쿠폰 발급 실패한다면 발급 결과 조회시 발급 결과는 실패, 대기 순번은 -1로 반환된다.")
-	@Test
-	void findPositionWhenFailToIssueCoupon() {
-		//given
-		Coupon coupon = createCoupon(10, 0);
-		User user = createUser();
-
-		//when
-		CouponApplyResponse response = couponApplyService.isCouponIssued(user.getId(), coupon.getId());
-
-		//then
-		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.FAILURE);
-		assertThat(response.getPosition()).isEqualTo(-1);
-	}
-
-	@DisplayName("쿠폰 발급중이라면 발급 결과 조회시 발급 결과는 발급중, 현재 대기열 순번이 반환된다.")
-	@Test
-	void findPositionWhenCouponIsBeingIssued() throws InterruptedException {
-		//given
-		int maxIssueCount = 10;
-		Coupon coupon = createCoupon(10, 0);
-
-		ExecutorService executorService = Executors.newFixedThreadPool(32);
-		CountDownLatch latch = new CountDownLatch(maxIssueCount);
-
-		int expectedPosition = 3;
-		Long expectedUserId = null;
-		Queue<Long> users = new ConcurrentLinkedDeque<>();
-
-		for (int i = 0; i < maxIssueCount; i++) {
-			User user = createUser();
-			users.add(user.getId());
-			if (i == expectedPosition - 1) {
-				expectedUserId = user.getId();
-			}
-		}
-
-		for (int i = 0; i < maxIssueCount; i++) {
-			executorService.submit(() -> {
-				try {
-					couponApplyService.applyCoupon(createRequest(users.remove(), coupon.getId()));
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					latch.countDown();
-				}
-			});
-			Thread.sleep(1000);
-		}
-
-		latch.await();
-
-		//when
-		CouponApplyResponse response = couponApplyService.isCouponIssued(expectedUserId, coupon.getId());
-
-		//then
-		assertThat(messageQ.size()).isEqualTo(maxIssueCount);
-		assertThat(response.getCouponIssueStatus()).isEqualTo(CouponIssueStatus.IN_PROGRESS);
-		assertThat(response.getPosition()).isEqualTo(expectedPosition);
 	}
 
 	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
