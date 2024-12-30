@@ -28,7 +28,7 @@ public class RedisCouponConsumer {
 	private final RedisCouponIssueFailHandler redisCouponIssueFailHandler;
 	private final RedisCouponIssueFacadeService redisCouponIssueFacadeService;
 
-	@Scheduled(fixedRate = 1000)
+	@Scheduled(fixedRate = 1000, initialDelay = 3000)
 	public void issueCoupon() {
 		if (couponIssueRepository.isEmpty()) {
 			return;
@@ -52,7 +52,7 @@ public class RedisCouponConsumer {
 		try {
 			redisCouponIssueFacadeService.issueCoupon(couponApplication);
 		} catch (BusinessException e) {
-			log.info("쿠폰발급 실패 > {}", e.getMessage());
+			log.warn("쿠폰발급 실패 > {}", e.getMessage());
 		} catch (Exception e) {
 			redisCouponIssueFailHandler.handleFail(couponApplication, e);
 		}

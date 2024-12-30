@@ -61,7 +61,7 @@ class CouponMessageQConsumerTest extends IntegrationTestSupport {
 
 		//then
 		await()
-			.atMost(2, SECONDS)
+			.atMost(4, SECONDS)
 			.untilAsserted(() -> {
 				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(1);
 

@@ -22,14 +22,14 @@ public class CouponMessageQConsumer {
 	private final CouponIssueFailHandlerImpl couponIssueFailHandler;
 	private final CouponIssueServiceImpl couponIssueService;
 
-	@Scheduled(cron = "0/1 * * * * *")
-	public synchronized void issueCoupon() {
+	@Scheduled(fixedRate = 1000, initialDelay = 3000)
+	public void issueCoupon() {
 		while (!messageQ.isEmpty()) {
 			CouponApplication couponApplication = messageQ.takeMessage();
 			try {
 				couponIssueService.issueCoupon(couponApplication);
 			} catch (BusinessException e) {
-				log.info("쿠폰발급 실패 > {}", e.getMessage());
+				log.warn("쿠폰발급 실패 > {}", e.getMessage());
 			} catch (Exception e) {
 				couponIssueFailHandler.handleFail(couponApplication, e);
 			}
