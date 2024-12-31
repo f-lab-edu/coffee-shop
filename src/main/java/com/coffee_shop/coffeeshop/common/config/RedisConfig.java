@@ -34,6 +34,15 @@ public class RedisConfig {
 	}
 
 	@Bean
+	public RedisTemplate<String, Integer> redisTemplateInteger() {
+		RedisTemplate<String, Integer> redisTemplate = new RedisTemplate<>();
+		redisTemplate.setConnectionFactory(redisConnectionFactory());
+		redisTemplate.setKeySerializer(new StringRedisSerializer());
+		redisTemplate.setValueSerializer(new GenericToStringSerializer<>(Integer.class));
+		return redisTemplate;
+	}
+
+	@Bean
 	public RedisTemplate<String, Object> redisTemplateJson() {
 		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(redisConnectionFactory());
