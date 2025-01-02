@@ -19,6 +19,7 @@ import com.coffee_shop.coffeeshop.controller.coupon.CouponApplyController;
 import com.coffee_shop.coffeeshop.controller.coupon.CouponController;
 import com.coffee_shop.coffeeshop.controller.item.ItemController;
 import com.coffee_shop.coffeeshop.service.cart.CartService;
+import com.coffee_shop.coffeeshop.service.coupon.CouponIssueStatusService;
 import com.coffee_shop.coffeeshop.service.coupon.CouponService;
 import com.coffee_shop.coffeeshop.service.coupon.apply.CouponApplyService;
 import com.coffee_shop.coffeeshop.service.item.ItemService;
@@ -50,6 +51,9 @@ public abstract class RestDocsSupport {
 
 	@MockBean
 	protected CouponApplyService couponApplyService;
+
+	@MockBean
+	protected CouponIssueStatusService couponIssueStatusService;
 
 	@BeforeEach
 	void setUp(WebApplicationContext webApplicationContext,
