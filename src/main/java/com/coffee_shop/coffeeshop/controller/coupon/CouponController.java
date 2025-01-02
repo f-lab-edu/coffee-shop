@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coffee_shop.coffeeshop.common.dto.response.ApiResponse;
+import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponIssuanceRateRequest;
 import com.coffee_shop.coffeeshop.controller.coupon.dto.request.CouponSaveRequest;
 import com.coffee_shop.coffeeshop.service.coupon.CouponService;
+import com.coffee_shop.coffeeshop.service.coupon.dto.response.CouponIssuanceRateResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,5 +28,12 @@ public class CouponController {
 	public ResponseEntity<ApiResponse<Void>> createCoupon(@RequestBody @Valid CouponSaveRequest request) {
 		Long couponId = couponService.createCoupon(request.toServiceRequest());
 		return ResponseEntity.created(URI.create("/api/coupons/" + couponId)).body(ApiResponse.created());
+	}
+
+	@PostMapping("/issuance-rate")
+	public ApiResponse<CouponIssuanceRateResponse> applyCoupon(@RequestBody @Valid CouponIssuanceRateRequest request) {
+		CouponIssuanceRateResponse response = couponService.changeIssuanceRate(
+			request.getIssuanceRate());
+		return ApiResponse.ok(response);
 	}
 }

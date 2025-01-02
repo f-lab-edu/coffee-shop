@@ -1,5 +1,6 @@
 package com.coffee_shop.coffeeshop.domain.coupon.producer;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.coffee_shop.coffeeshop.common.exception.BusinessException;
@@ -15,7 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class RedisCouponProducer {
+@ConditionalOnProperty(name = "schedule.active", havingValue = "redis")
+public class RedisCouponProducer implements CouponProducer {
 	private final CouponIssueRepository couponIssueRepository;
 
 	public void applyCoupon(User user, Coupon coupon) {

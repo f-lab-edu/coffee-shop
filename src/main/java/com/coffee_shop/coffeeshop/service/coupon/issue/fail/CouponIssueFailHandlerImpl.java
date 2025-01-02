@@ -2,7 +2,7 @@ package com.coffee_shop.coffeeshop.service.coupon.issue.fail;
 
 import java.util.List;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.coffee_shop.coffeeshop.domain.coupon.MessageQ;
 import com.coffee_shop.coffeeshop.service.coupon.dto.request.CouponApplication;
@@ -12,20 +12,23 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
+@Service
 public class CouponIssueFailHandlerImpl {
 	private static final int MAX_FAIL_COUNT = 3;
 	private final MessageQ messageQ;
+	private final CouponIssueFailHistoryService couponIssueFailHistoryService;
 
 	public void handleFail(CouponApplication couponApplication, Exception exception) {
 		couponApplication.addException(exception);
 		couponApplication.increaseFailCount();
 
-		if (couponApplication.getFailCount() >= MAX_FAIL_COUNT) {
-			handleTooManyFails(couponApplication);
-		} else {
+		if (MAX_FAIL_COUNT > couponApplication.getFailCount()) {
 			messageQ.addFirst(couponApplication);
+			return;
 		}
+
+		handleTooManyFails(couponApplication);
+		couponIssueFailHistoryService.saveCouponFailHistory(couponApplication);
 	}
 
 	private void handleTooManyFails(CouponApplication couponApplication) {

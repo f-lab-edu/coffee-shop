@@ -142,7 +142,7 @@ class CouponApplyControllerTest extends RestDocsSupport {
 			.position(-1)
 			.build();
 
-		when(couponApplyService.isCouponIssued(any(), any())).thenReturn(couponApplyResponse);
+		when(couponIssueStatusService.isCouponIssued(any(), any())).thenReturn(couponApplyResponse);
 
 		//when //then
 		mockMvc.perform(
