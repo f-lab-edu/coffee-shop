@@ -6,7 +6,7 @@
         <key-type>java.lang.String</key-type>
         <value-type>java.lang.Integer</value-type>
         <expiry>
-            <ttl unit="days">1</ttl>
+            <ttl unit="seconds">30</ttl>
         </expiry>
 
         <listeners>
