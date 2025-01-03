@@ -1,7 +1,9 @@
 package com.coffee_shop.coffeeshop.service.coupon.issue.fail;
 
 import static com.coffee_shop.coffeeshop.domain.coupon.CouponType.*;
+import static java.util.concurrent.TimeUnit.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -90,17 +92,19 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		couponIssueRepository.add(CouponApplication.of(user, coupon), 1731488205);
 
 		//then
-		Thread.sleep(3000);
+		await()
+			.atMost(6, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(0);
+				assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(0);
-		assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
+				assertTrue(couponIssueRepository.isEmpty());
 
-		assertTrue(couponIssueRepository.isEmpty());
-
-		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(3);
-		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
-			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
+				List<ILoggingEvent> testLogs = listAppender.list;
+				assertThat(testLogs.size()).isEqualTo(3);
+				assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
+					"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
+			});
 	}
 
 	@DisplayName("쿠폰 발급 중 최대 실패 회수를 초과한 쿠폰은 제외하고 나머지는 정상 발급된다.")
@@ -153,17 +157,19 @@ class RedisCouponIssueFailHandlerTest extends IntegrationTestSupport {
 		latch.await();
 
 		//then
-		Thread.sleep(4000);
+		await()
+			.atMost(6, SECONDS)
+			.untilAsserted(() -> {
+				assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount - 1);
+				assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
 
-		assertThat(couponTransactionHistoryRepository.findAll()).hasSize(maxIssueCount - 1);
-		assertThat(couponIssueFailHistoryRepository.findAll()).hasSize(1);
+				assertTrue(couponIssueRepository.isEmpty());
 
-		assertTrue(couponIssueRepository.isEmpty());
-
-		List<ILoggingEvent> testLogs = listAppender.list;
-		assertThat(testLogs.size()).isEqualTo(3);
-		assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
-			"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
+				List<ILoggingEvent> testLogs = listAppender.list;
+				assertThat(testLogs.size()).isEqualTo(3);
+				assertThat(testLogs.get(2).getFormattedMessage()).isEqualTo(
+					"최대 실패 횟수 " + maxFailCount + "회를 초과하였습니다. 실패 횟수 : " + maxFailCount);
+			});
 	}
 
 	private CouponApplyServiceRequest createRequest(Long userId, Long couponId) {
