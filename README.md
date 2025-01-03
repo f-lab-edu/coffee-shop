@@ -19,10 +19,12 @@
 ## 프로젝트를 진행하며 고민한 Technical Issue
 
 - 자세한 사항은 여기서 확인해주세요! 👉 [Technical Issue](https://github.com/f-lab-edu/coffee-shop/wiki/04.-Technical-Issue)
-- 단일 서버 환경에서는 Spring으로 큐 구현, 분산 서버 환경에서는 redis로 큐를 관리하여 운영 환경 특성을 고려하여 설계
-- Sentinel을 통한 자동 페일오버 메커니즘 설정으로 장애 발생 시 슬레이브를 새로운 마스터로 자동 승격하여 서비스 중단 시간을 최소화
-- K6 테스트 스크립트를 작성하여 대규모 트래픽 시나리오를 시뮬레이션, 성능 튜닝
-- Prometheus와 Grafana를 연동하여 인프라 및 애플리케이션 메트릭을 실시간으로 수집 및 시각화
+- 선착순 쿠폰 발급 시스템에서 단일 서버 환경에서는 Spring으로 큐 구현, 분산 서버 환경에서는 **Redis로 큐**를 관리하여 운영 환경 특성을 고려하여 설계
+- Sentinel을 통한 자동 **페일오버** 메커니즘 설정으로 장애 발생 시 서비스 중단 시간을 최소화
+- 상세한 **단위 테스트, 통합 테스트** 작성으로 코드 품질 향상, 테스트 코드 커버리지
+  77% | [코드보기](https://github.com/f-lab-edu/coffee-shop/blob/develop/src/test/java/com/coffee_shop/coffeeshop/service/coupon/issue/fail/CouponIssueFailHandlerImplTest.java)
+- K6 테스트 스크립트를 작성하여 **대규모 트래픽 시나리오**를 시뮬레이션, **성능 튜닝**
+- Prometheus와 Grafana를 연동하여 인프라 및 애플리케이션 **메트릭 실시간 수집 및 시각화**
 
 ## ERD
 
