@@ -19,12 +19,14 @@
 ## 프로젝트를 진행하며 고민한 Technical Issue
 
 - 자세한 사항은 여기서 확인해주세요! 👉 [Technical Issue](https://github.com/f-lab-edu/coffee-shop/wiki/04.-Technical-Issue)
-- 선착순 쿠폰 발급 시스템에서 단일 서버 환경에서는 Spring으로 큐 구현, 분산 서버 환경에서는 **Redis로 큐**를 관리하여 운영 환경 특성을 고려하여 설계
-- Sentinel을 통한 자동 **페일오버** 메커니즘 설정으로 장애 발생 시 서비스 중단 시간을 최소화
-- 상세한 **단위 테스트, 통합 테스트** 작성으로 코드 품질 향상, 테스트 코드 커버리지
+1. 스레드 풀, 커넥션 풀 튜닝을 통한 응답시간 단축 
+2. 쿠폰 발급 개수 DB 동기화 기능 최적화 및 Redis Replication을 통한 가용성 강화
+3. 두 트랜잭션이 서로의 잠금을 획득하기 위해 발생한 데드락 문제 해결
+4. 쿠폰 대기열로 Redis Sorted Set을 선택한 이유
+5. 쿠폰 발급 부하 조절과 운영 효율성 향상을 위한 처리량 조절
+6. 상세한 **단위 테스트, 통합 테스트** 작성으로 코드 품질 향상, 테스트 코드 커버리지
   77% | [코드보기](https://github.com/f-lab-edu/coffee-shop/blob/develop/src/test/java/com/coffee_shop/coffeeshop/service/coupon/issue/fail/CouponIssueFailHandlerImplTest.java)
-- K6 테스트 스크립트를 작성하여 **대규모 트래픽 시나리오**를 시뮬레이션, **성능 튜닝**
-- Prometheus와 Grafana를 연동하여 인프라 및 애플리케이션 **메트릭 실시간 수집 및 시각화**
+7. K6 테스트 스크립트로 작성한 성능테스트
 
 ## ERD
 
